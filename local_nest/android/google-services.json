@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "840212482870",
+    "project_id": "localnest-7eada",
+    "storage_bucket": "localnest-7eada.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840212482870:android:ace5dcc68aa841ad27c197",
+        "android_client_info": {
+          "package_name": "com.example.local_nest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2EJEIVTTFRguw-4UAhs9U0nmxHhaGL0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
