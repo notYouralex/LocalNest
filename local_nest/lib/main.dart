@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:local_nest/features/authentication/presentation.dart/intro_page_container.dart' show IntroScreenContainer;
+import 'app/router/app_router.dart';
+import 'app/theme/app_theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -8,12 +9,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      home: const IntroScreenContainer(),
+      title: 'LocalNest',
+      theme: AppTheme.lightTheme,
+      routerConfig: AppRouter.router,
     );
   }
 }

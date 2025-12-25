@@ -70,18 +70,18 @@ class DefaultIntroDataProvider implements IntroDataProvider {
         title: 'Looking for a Place',
         subtitle: 'Find verified boarding houses near you',
         icon: Icons.search,
-        iconColor: const Color(0xFF6366F1),
-        iconBgColor: const Color(0xFF6366F1).withOpacity(0.1),
+        iconColor: const Color(0xFF238B45),
+        iconBgColor: const Color(0xFF238B45).withOpacity(0.1),
         features: const [
           FeatureItem(
             icon: Icons.location_on,
             label: 'Map Search',
-            color: Color(0xFF6366F1),
+            color: Color(0xFF238B45),
           ),
           FeatureItem(
             icon: Icons.shield,
             label: 'Verified',
-            color: Color(0xFF10B981),
+            color: Color(0xFF41AB5D),
           ),
           FeatureItem(
             icon: Icons.favorite,
@@ -90,8 +90,8 @@ class DefaultIntroDataProvider implements IntroDataProvider {
           ),
         ],
         buttonText: 'Continue as Renter',
-        buttonColor: const Color(0xFF6366F1),
-        borderColor: const Color(0xFF6366F1),
+        buttonColor: const Color(0xFF238B45),
+        borderColor: const Color(0xFF238B45),
       ),
       IntroOption(
         id: 'landlord',
@@ -109,7 +109,7 @@ class DefaultIntroDataProvider implements IntroDataProvider {
           FeatureItem(
             icon: Icons.shield,
             label: 'Get Verified',
-            color: Color(0xFF10B981),
+            color: Color(0xFF41AB5D),
           ),
         ],
         buttonText: 'Continue as Landlord',
@@ -144,9 +144,9 @@ class IntroScreen extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF6366F1),
-              Color(0xFF7C3AED),
-              Color(0xFF6366F1),
+              Color(0xFF41AB5D),
+              Color(0xFF238B45),
+              Color(0xFF006D2C),
             ],
           ),
         ),
@@ -193,7 +193,7 @@ class _IntroHeader extends StatelessWidget {
               child: Icon(
                 Icons.home,
                 size: 32,
-                color: Color(0xFF6366F1),
+                color: Color(0xFF238B45),
               ),
             ),
           ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'intro_page.dart';
+import '../../../app/router/app_router.dart';
 
 // ============================================================================
 // CONCRETE NAVIGATION SERVICE IMPLEMENTATION
@@ -12,20 +14,14 @@ class AppIntroNavigationService implements IntroNavigationService {
 
   @override
   void onRenterSelected() {
-    // Navigate to renter flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Renter mode selected')),
-    );
-    // Navigator.pushNamed(context, '/renter-home');
+    // Navigate to login as renter
+    context.push(AppRoutes.login);
   }
 
   @override
   void onLandlordSelected() {
-    // Navigate to landlord flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Landlord mode selected')),
-    );
-    // Navigator.pushNamed(context, '/landlord-home');
+    // Navigate to login as landlord
+    context.push(AppRoutes.login);
   }
 }
 
