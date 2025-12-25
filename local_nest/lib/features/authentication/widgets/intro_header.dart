@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../app/theme/theme.dart';
 
 /// Header widget for the intro screen with logo and title
@@ -26,12 +27,11 @@ class IntroHeader extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Center(
-              child: Icon(
-                Icons.home,
-                size: 32,
-                color: AppColors.primary,
-              ),
+            child: Center(
+              child: SvgPicture.asset(
+                    'assets/icons/logo.svg',
+                    fit: BoxFit.fill
+                  ),
             ),
           ),
           const SizedBox(height: 12),

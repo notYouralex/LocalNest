@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-/// App text styles based on the Figma design
+/// App text styles based on the Figma design using Inter font
 class AppTextStyles {
   AppTextStyles._();
 
+  /// Base Inter text style
+  static TextStyle get _inter => GoogleFonts.inter();
+
   // Headings
-  static const TextStyle heading1 = TextStyle(
+  static TextStyle get heading1 => _inter.copyWith(
     fontSize: 30,
     fontWeight: FontWeight.w400,
     color: AppColors.textWhite,
     height: 1.2,
   );
 
-  static const TextStyle heading2 = TextStyle(
+  static TextStyle get heading2 => _inter.copyWith(
     fontSize: 24,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
@@ -21,21 +25,21 @@ class AppTextStyles {
   );
 
   // Body Text
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle get bodyLarge => _inter.copyWith(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
     height: 1.5,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
+  static TextStyle get bodyMedium => _inter.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
     height: 1.43,
   );
 
-  static const TextStyle bodySmall = TextStyle(
+  static TextStyle get bodySmall => _inter.copyWith(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
@@ -43,7 +47,7 @@ class AppTextStyles {
   );
 
   // Subtitle
-  static const TextStyle subtitle = TextStyle(
+  static TextStyle get subtitle => _inter.copyWith(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.textWhite80,
@@ -51,7 +55,7 @@ class AppTextStyles {
   );
 
   // Label
-  static const TextStyle label = TextStyle(
+  static TextStyle get label => _inter.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
@@ -59,28 +63,28 @@ class AppTextStyles {
   );
 
   // Input
-  static const TextStyle inputText = TextStyle(
+  static TextStyle get inputText => _inter.copyWith(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
     height: 1.5,
   );
 
-  static const TextStyle inputHint = TextStyle(
+  static TextStyle get inputHint => _inter.copyWith(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
 
   // Button
-  static const TextStyle buttonText = TextStyle(
+  static TextStyle get buttonText => _inter.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     color: AppColors.textWhite,
     height: 1.43,
   );
 
-  static const TextStyle buttonTextDark = TextStyle(
+  static TextStyle get buttonTextDark => _inter.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
@@ -88,14 +92,14 @@ class AppTextStyles {
   );
 
   // Link
-  static const TextStyle link = TextStyle(
+  static TextStyle get link => _inter.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.primary,
     height: 1.43,
   );
 
-  static const TextStyle linkLarge = TextStyle(
+  static TextStyle get linkLarge => _inter.copyWith(
     fontSize: 16,
     fontWeight: FontWeight.w500,
     color: AppColors.primary,

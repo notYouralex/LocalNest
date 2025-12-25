@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../app/theme/theme.dart';
 
 /// Gradient header for authentication screens
@@ -37,7 +38,6 @@ class AuthHeader extends StatelessWidget {
               icon!,
               const SizedBox(height: 16),
             ] else ...[
-              // Default LocalNest logo container
               Container(
                 width: 80,
                 height: 80,
@@ -52,11 +52,10 @@ class AuthHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.home_rounded,
-                    size: 48,
-                    color: AppColors.primary,
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/icons/logo.svg',
+                    fit: BoxFit.fill
                   ),
                 ),
               ),
