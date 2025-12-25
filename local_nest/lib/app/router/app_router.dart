@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/authentication/presentation.dart/intro_page_container.dart';
-import '../../features/authentication/pages/login_page.dart';
+import '../../features/authentication/authentication.dart';
 
 /// Route paths constants
 class AppRoutes {
@@ -12,6 +11,23 @@ class AppRoutes {
   static const String signUp = '/sign-up';
   static const String forgotPassword = '/forgot-password';
   static const String home = '/home';
+}
+
+/// Navigation service implementation using GoRouter
+class _AppIntroNavigationService implements IntroNavigationService {
+  final BuildContext context;
+
+  _AppIntroNavigationService(this.context);
+
+  @override
+  void onRenterSelected() {
+    context.push(AppRoutes.login);
+  }
+
+  @override
+  void onLandlordSelected() {
+    context.push(AppRoutes.login);
+  }
 }
 
 /// App router configuration using Go Router
@@ -26,7 +42,9 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.intro,
         name: 'intro',
-        builder: (context, state) => const IntroScreenContainer(),
+        builder: (context, state) => IntroPage.withDefaults(
+          navigationService: _AppIntroNavigationService(context),
+        ),
       ),
       
       // Login screen
