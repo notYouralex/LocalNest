@@ -69,13 +69,25 @@ class AppRouter {
         ),
       ),
       
-      // Sign Up screen (placeholder for now)
+      // Sign Up screen
       GoRoute(
         path: AppRoutes.signUp,
         name: 'signUp',
-        builder: (context, state) => Scaffold(
-          appBar: AppBar(title: const Text('Sign Up')),
-          body: const Center(child: Text('Sign Up Page - Coming Soon')),
+        builder: (context, state) => SignUpPage(
+          onBackPressed: () => context.pop(),
+          onSignInPressed: () => context.pop(),
+          onSignUp: (name, email, password) {
+            // TODO: Implement sign up logic with Bloc
+            debugPrint('Sign up: $name, $email');
+          },
+          onGoogleSignUp: () {
+            // TODO: Implement Google sign up
+            debugPrint('Google sign up');
+          },
+          onFacebookSignUp: () {
+            // TODO: Implement Facebook sign up
+            debugPrint('Facebook sign up');
+          },
         ),
       ),
       
