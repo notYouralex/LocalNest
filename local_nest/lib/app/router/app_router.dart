@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/core.dart';
 import '../../features/authentication/authentication.dart';
 
 /// Route paths constants
@@ -57,14 +58,17 @@ class AppRouter {
           onSignIn: (email, password, rememberMe) {
             // TODO: Implement sign in logic with Bloc
             debugPrint('Sign in: $email, remember: $rememberMe');
+            context.go(AppRoutes.home);
           },
           onGoogleSignIn: () {
             // TODO: Implement Google sign in
             debugPrint('Google sign in');
+            context.go(AppRoutes.home);
           },
           onFacebookSignIn: () {
             // TODO: Implement Facebook sign in
             debugPrint('Facebook sign in');
+            context.go(AppRoutes.home);
           },
         ),
       ),
@@ -99,6 +103,13 @@ class AppRouter {
           appBar: AppBar(title: const Text('Forgot Password')),
           body: const Center(child: Text('Forgot Password Page - Coming Soon')),
         ),
+      ),
+
+      // Main app with bottom navigation
+      GoRoute(
+        path: AppRoutes.home,
+        name: 'home',
+        builder: (context, state) => const MainNavigationShell(),
       ),
     ],
   );
