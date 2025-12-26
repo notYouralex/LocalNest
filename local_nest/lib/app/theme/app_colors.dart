@@ -45,8 +45,10 @@ class AppColors {
 
   // Status Colors
   static const Color success = Color(0xFF41AB5D);  // green500
+  static const Color successDark = Color(0xFF10B981);  // Teal green for available badge
+  static const Color successLight = Color(0xFF85D72F);  // Lime green for amenity badges
   static const Color error = Color(0xFFEF4444);
-  static const Color warning = Color(0xFFF59E0B);
+  static const Color warning = Color(0xFFF59E0B);  // Amber for price
 
   // Social Button Colors
   static const Color google = Color(0xFFDB4437);

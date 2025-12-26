@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../app/theme/theme.dart';
+import '../../features/home/pages/home_page.dart';
 
 /// Main navigation shell with bottom navigation bar
 class MainNavigationShell extends StatefulWidget {
@@ -13,12 +14,12 @@ class MainNavigationShell extends StatefulWidget {
 class _MainNavigationShellState extends State<MainNavigationShell> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    _PlaceholderPage(title: 'Home'),
-    _PlaceholderPage(title: 'Search'),
-    _PlaceholderPage(title: 'Favorites'),
-    _PlaceholderPage(title: 'Messages'),
-    _PlaceholderPage(title: 'Profile'),
+  final List<Widget> _pages = [
+    const HomePage(),
+    const _PlaceholderPage(title: 'Search'),
+    const _PlaceholderPage(title: 'Favorites'),
+    const _PlaceholderPage(title: 'Messages'),
+    const _PlaceholderPage(title: 'Profile'),
   ];
 
   @override
