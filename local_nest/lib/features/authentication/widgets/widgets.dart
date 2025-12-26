@@ -9,3 +9,5 @@ export 'auth_primary_button.dart';
 export 'social_login_button.dart';
 export 'auth_header.dart';
 export 'auth_divider.dart';
+export 'sign_up_header.dart';
+export 'terms_checkbox.dart';

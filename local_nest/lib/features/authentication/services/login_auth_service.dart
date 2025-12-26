@@ -1,6 +1,22 @@
+import '../models/models.dart';
+
 /// Abstract interface for login authentication service
 abstract class LoginAuthService {
-  Future<void> signInWithEmail(String email, String password);
-  Future<void> signInWithGoogle();
-  Future<void> signInWithFacebook();
+  /// Sign in with email and password
+  Future<UserModel> signInWithEmail(String email, String password);
+
+  /// Sign in with Google
+  Future<UserModel> signInWithGoogle();
+
+  /// Sign in with Facebook
+  Future<UserModel> signInWithFacebook();
+
+  /// Sign out
+  Future<void> signOut();
+
+  /// Get current authenticated user
+  Future<UserModel?> getCurrentUser();
+
+  /// Stream of authentication state changes
+  Stream<UserModel?> authStateChanges();
 }

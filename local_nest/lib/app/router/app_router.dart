@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/core.dart';
 import '../../features/authentication/authentication.dart';
+import '../../features/authentication/services/auth_service_provider.dart';
 
 /// Route paths constants
 class AppRoutes {
   AppRoutes._();
-  
+
   static const String intro = '/';
   static const String login = '/login';
   static const String signUp = '/sign-up';
@@ -47,7 +49,7 @@ class AppRouter {
           navigationService: _AppIntroNavigationService(context),
         ),
       ),
-      
+
       // Login screen
       GoRoute(
         path: AppRoutes.login,
@@ -72,29 +74,22 @@ class AppRouter {
           },
         ),
       ),
-      
+
       // Sign Up screen
       GoRoute(
         path: AppRoutes.signUp,
         name: 'signUp',
-        builder: (context, state) => SignUpPage(
-          onBackPressed: () => context.pop(),
-          onSignInPressed: () => context.pop(),
-          onSignUp: (name, email, password) {
-            // TODO: Implement sign up logic with Bloc
-            debugPrint('Sign up: $name, $email');
-          },
-          onGoogleSignUp: () {
-            // TODO: Implement Google sign up
-            debugPrint('Google sign up');
-          },
-          onFacebookSignUp: () {
-            // TODO: Implement Facebook sign up
-            debugPrint('Facebook sign up');
-          },
+        builder: (context, state) => BlocProvider(
+          create: (context) => SignUpBloc(
+            authService: AuthServiceProvider.getSignUpAuthService(),
+          ),
+          child: SignUpPage(
+            onBackPressed: () => context.pop(),
+            onSignInPressed: () => context.pop(),
+          ),
         ),
       ),
-      
+
       // Forgot Password screen (placeholder for now)
       GoRoute(
         path: AppRoutes.forgotPassword,

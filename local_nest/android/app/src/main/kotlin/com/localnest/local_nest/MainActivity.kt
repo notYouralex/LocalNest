@@ -1,4 +1,4 @@
-package com.localnest.app
+package com.localnest.local_nest
 
 import io.flutter.embedding.android.FlutterActivity
 

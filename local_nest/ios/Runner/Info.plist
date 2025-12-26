@@ -49,5 +49,36 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<!-- Google & Facebook Sign-In URL Schemes -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>Google</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.840212482870-abc123def456ghi789jkl012mno345pqr</string>
+				</array>
+			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>Facebook</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>fb123456789</string>
+				</array>
+			</dict>
+		</array>
+		<!-- Firebase Configuration Keys -->
+		<key>GIDClientID</key>
+		<string>840212482870-abc123def456ghi789jkl012mno345pqr.apps.googleusercontent.com</string>
+		<key>FacebookAppID</key>
+		<string>123456789</string>
+		<key>FacebookDisplayName</key>
+		<string>LocalNest</string>
 	</dict>
 </plist>

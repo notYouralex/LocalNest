@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:840212482870:android:ace5dcc68aa841ad27c197",
+        "mobilesdk_app_id": "1:840212482870:android:00a6c79ed954e5f227c197",
         "android_client_info": {
-          "package_name": "com.example.local_nest"
+          "package_name": "com.localnest.app"
         }
       },
       "oauth_client": [],
