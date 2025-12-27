@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme/theme.dart';
+import '../../../core/widgets/widgets.dart';
 import '../bloc/listing_bloc.dart';
 import '../bloc/listing_event.dart';
 import '../bloc/listing_state.dart';
+import '../constants/home_constants.dart';
 import '../repositories/listing_repository_impl.dart';
+import '../widgets/home_filter_modal.dart';
 import '../widgets/home_header.dart';
 import '../widgets/listing_card.dart';
 
@@ -17,28 +20,65 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late ListingBloc _listingBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _listingBloc = ListingBloc(
+      repository: ListingRepositoryImpl(),
+    )..add(const FetchListingsEvent());
+  }
+
+  @override
+  void dispose() {
+    _listingBloc.close();
+    super.dispose();
+  }
+
   void _handleSearch(String query) {
     // Navigate to search page with query parameter
-    context.push('/search?q=$query');
+    if (query.isNotEmpty) {
+      context.push('/search?q=$query');
+    }
   }
 
   void _handleFilter() {
-    // TODO: Show filter modal
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      builder: (context) => HomeFilterModal(
+        onApplyFilters: (filters) {
+          // Handle filter application
+          // TODO: Emit event to BLoC with selected filters
+          // _listingBloc.add(FilterListingsEvent(
+          //   minPrice: filters['minPrice'],
+          //   maxPrice: filters['maxPrice'],
+          //   roomType: filters['roomType'],
+          //   capacity: filters['capacity'],
+          // ));
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ListingBloc(
-        repository: ListingRepositoryImpl(),
-      )..add(const FetchListingsEvent()),
+    return BlocProvider<ListingBloc>.value(
+      value: _listingBloc,
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: CustomScrollView(
           slivers: [
             // Collapsible Header
             SliverAppBar(
-              expandedHeight: 220,
+              expandedHeight: HomeConstants.expandedHeaderHeight,
               floating: true,
               pinned: false,
               snap: false,
@@ -56,12 +96,12 @@ class _HomePageState extends State<HomePage> {
             // Content area
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(HomeConstants.contentPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Available Listings',
+                      HomeConstants.availableListingsTitle,
                       style: AppTextStyles.heading2.copyWith(
                         color: AppColors.textPrimary,
                       ),
@@ -76,7 +116,8 @@ class _HomePageState extends State<HomePage> {
             // Bottom padding for navigation bar
             SliverToBoxAdapter(
               child: SizedBox(
-                height: MediaQuery.of(context).padding.bottom + 80,
+                height: MediaQuery.of(context).padding.bottom +
+                    HomeConstants.bottomNavPadding,
               ),
             ),
           ],
@@ -89,84 +130,71 @@ class _HomePageState extends State<HomePage> {
   Widget _buildListingsSection() {
     return BlocBuilder<ListingBloc, ListingState>(
       builder: (context, state) {
-        if (state is ListingInitialState) {
-          return Container(
-            
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else if (state is ListingLoadingState) {
-          return Container(
-            
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else if (state is ListingLoadedState) {
-          return _buildListingsGrid(context, state.listings);
-        } else if (state is ListingErrorState) {
-          return Container(
-            
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.border,
-                width: 1,
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Error loading listings',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.error,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<ListingBloc>().add(const RefreshListingsEvent());
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else {
-          return Container(
-            
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.border,
-                width: 1,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                'No listings found',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          );
+        if (state is ListingInitialState || state is ListingLoadingState) {
+          return _buildLoadingState();
         }
+
+        if (state is ListingErrorState) {
+          return _buildErrorState(state.message);
+        }
+
+        if (state is ListingLoadedState) {
+          return _buildListingsGrid(context, state.listings);
+        }
+
+        return _buildEmptyState();
       },
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(HomeConstants.cardBorderRadius),
+      ),
+      padding: const EdgeInsets.all(48),
+      child: const LoadingStateWidget(
+        message: 'Loading listings...',
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(HomeConstants.cardBorderRadius),
+        border: Border.all(
+          color: AppColors.divider,
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(48),
+      child: ErrorStateWidget(
+        message: message,
+        onRetry: () {
+          _listingBloc.add(const RefreshListingsEvent());
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(HomeConstants.cardBorderRadius),
+        border: Border.all(
+          color: AppColors.divider,
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(48),
+      child: const EmptyStateWidget(
+        title: 'No listings found',
+        icon: Icons.search_off,
+      ),
     );
   }
 
@@ -176,10 +204,10 @@ class _HomePageState extends State<HomePage> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 1,
-        mainAxisSpacing: 16,
+        crossAxisCount: HomeConstants.gridCrossAxisCount,
+        mainAxisSpacing: HomeConstants.gridMainAxisSpacing,
         crossAxisSpacing: 0,
-        childAspectRatio: 1.1,
+        childAspectRatio: HomeConstants.gridChildAspectRatio,
       ),
       itemCount: listings.length,
       itemBuilder: (context, index) {
@@ -191,7 +219,7 @@ class _HomePageState extends State<HomePage> {
             // context.push('/listing/${listing.id}');
           },
           onFavoriteChanged: () {
-            // Favorite status changed - can add custom logic here
+            // Favorite status changed via BLoC
           },
         );
       },

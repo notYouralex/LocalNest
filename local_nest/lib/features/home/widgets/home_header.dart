@@ -149,22 +149,18 @@ class _HomeHeaderState extends State<HomeHeader> {
                 // Filter Button
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: widget.onFilterTap,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.tune,
-                          color: AppColors.textSecondary,
-                          size: 20,
-                        ),
+                  child: GestureDetector(
+                    onTap: widget.onFilterTap,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.tune,
+                        color: AppColors.textSecondary,
+                        size: 20,
                       ),
                     ),
                   ),

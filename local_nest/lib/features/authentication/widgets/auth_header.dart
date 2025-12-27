@@ -14,7 +14,7 @@ class AuthHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.icon,
-    this.height = 244,
+    this.height = 280,
   });
 
   @override
