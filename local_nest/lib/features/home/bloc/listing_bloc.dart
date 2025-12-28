@@ -82,7 +82,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     try {
       final updatedListing = await _repository.toggleFavorite(event.listingId);
       
-      // Update the listing in the current list
+      // Update the listing in the current list and keep favorites in sync
       if (state is ListingLoadedState) {
         final currentState = state as ListingLoadedState;
         final updatedListings = currentState.listings.map((listing) {
@@ -96,9 +96,33 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
           listings: updatedListings,
           hasMoreData: currentState.hasMoreData,
         ));
+      } else if (state is ListingSearchResultsState) {
+        // Also update search results if they exist
+        final currentState = state as ListingSearchResultsState;
+        final updatedResults = currentState.results.map((listing) {
+          if (listing.id == event.listingId) {
+            return updatedListing;
+          }
+          return listing;
+        }).toList();
+        
+        emit(ListingSearchResultsState(updatedResults));
+      } else if (state is ListingFavoritesState) {
+        // Update favorites list if we're viewing favorites
+        final currentState = state as ListingFavoritesState;
+        final updatedFavorites = currentState.favorites.map((listing) {
+          if (listing.id == event.listingId) {
+            return updatedListing;
+          }
+          return listing;
+        }).toList();
+        
+        emit(ListingFavoritesState(updatedFavorites));
       }
       
-      emit(ListingFavoriteToggledState(updatedListing));
+      // Always fetch fresh favorites list to keep all pages in sync
+      final updatedFavorites = await _repository.getFavoriteListings();
+      emit(ListingFavoritesState(updatedFavorites));
     } catch (e) {
       emit(ListingErrorState(e.toString()));
     }

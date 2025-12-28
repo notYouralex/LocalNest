@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:local_nest/core/widgets/main_navigation_shell.dart';
 import '../../../app/theme/theme.dart';
 import '../../home/bloc/listing_bloc.dart';
 import '../../home/bloc/listing_event.dart';
@@ -92,6 +93,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   void _handleBrowseListings() {
-    // TODO: Navigate to search page
+    MainNavigationShell.switchToTab(context, 1); // Search tab
   }
 }

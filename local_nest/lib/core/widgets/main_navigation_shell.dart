@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../app/theme/theme.dart';
+import '../../features/home/bloc/listing_bloc.dart';
+import '../../features/home/repositories/listing_repository_impl.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/search/pages/search_page.dart';
 import '../../features/favorites/favorites.dart';
@@ -15,6 +18,11 @@ class MainNavigationShell extends StatefulWidget {
     this.initialPageIndex,
     this.searchQuery,
   });
+
+  static void switchToTab(BuildContext context, int index) {
+    final state = context.findAncestorStateOfType<_MainNavigationShellState>();
+    state?._onTabTapped(index);
+  }
 
   @override
   State<MainNavigationShell> createState() => _MainNavigationShellState();
@@ -31,7 +39,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     _pages = [
       const HomePage(),
       SearchPage(initialQuery: widget.searchQuery),
-      const FavoritesPage(),
+      FavoritesPage(),
       const _PlaceholderPage(title: 'Messages'),
       const _PlaceholderPage(title: 'Profile'),
     ];
@@ -39,64 +47,64 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  label: 'Home',
-                  activeIcon: 'assets/icons/home_clicked.svg',
-                  inactiveIcon: 'assets/icons/home_notclicked.svg',
-                  isSelected: _currentIndex == 0,
-                  onTap: () => _onTabTapped(0),
-                ),
-                _NavItem(
-                  label: 'Search',
-                  activeIcon: 'assets/icons/search_clicked.svg',
-                  inactiveIcon: 'assets/icons/search_notclicked.svg',
-                  isSelected: _currentIndex == 1,
-                  onTap: () => _onTabTapped(1),
-                ),
-                _NavItem(
-                  label: 'Favorites',
-                  activeIcon: 'assets/icons/heart_clicked.svg',
-                  inactiveIcon: 'assets/icons/heart_notclicked.svg',
-                  isSelected: _currentIndex == 2,
-                  onTap: () => _onTabTapped(2),
-                ),
-                _NavItem(
-                  label: 'Messages',
-                  activeIcon: 'assets/icons/messages_clicked.svg',
-                  inactiveIcon: 'assets/icons/messages_notclicked.svg',
-                  isSelected: _currentIndex == 3,
-                  onTap: () => _onTabTapped(3),
-                ),
-                _NavItem(
-                  label: 'Profile',
-                  activeIcon: 'assets/icons/profile_clicked.svg',
-                  inactiveIcon: 'assets/icons/profile_notclicked.svg',
-                  isSelected: _currentIndex == 4,
-                  onTap: () => _onTabTapped(4),
-                ),
-              ],
+    return BlocProvider<ListingBloc>(
+      create: (context) => ListingBloc(repository: ListingRepositoryImpl()),
+      child: Scaffold(
+        body: IndexedStack(index: _currentIndex, children: _pages),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _NavItem(
+                    label: 'Home',
+                    activeIcon: 'assets/icons/home_clicked.svg',
+                    inactiveIcon: 'assets/icons/home_notclicked.svg',
+                    isSelected: _currentIndex == 0,
+                    onTap: () => _onTabTapped(0),
+                  ),
+                  _NavItem(
+                    label: 'Search',
+                    activeIcon: 'assets/icons/search_clicked.svg',
+                    inactiveIcon: 'assets/icons/search_notclicked.svg',
+                    isSelected: _currentIndex == 1,
+                    onTap: () => _onTabTapped(1),
+                  ),
+                  _NavItem(
+                    label: 'Favorites',
+                    activeIcon: 'assets/icons/heart_clicked.svg',
+                    inactiveIcon: 'assets/icons/heart_notclicked.svg',
+                    isSelected: _currentIndex == 2,
+                    onTap: () => _onTabTapped(2),
+                  ),
+                  _NavItem(
+                    label: 'Messages',
+                    activeIcon: 'assets/icons/messages_clicked.svg',
+                    inactiveIcon: 'assets/icons/messages_notclicked.svg',
+                    isSelected: _currentIndex == 3,
+                    onTap: () => _onTabTapped(3),
+                  ),
+                  _NavItem(
+                    label: 'Profile',
+                    activeIcon: 'assets/icons/profile_clicked.svg',
+                    inactiveIcon: 'assets/icons/profile_notclicked.svg',
+                    isSelected: _currentIndex == 4,
+                    onTap: () => _onTabTapped(4),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -185,10 +193,7 @@ class _PlaceholderPage extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            Text(
-              '$title Page',
-              style: AppTextStyles.heading2,
-            ),
+            Text('$title Page', style: AppTextStyles.heading2),
             const SizedBox(height: 8),
             Text(
               'Coming Soon',

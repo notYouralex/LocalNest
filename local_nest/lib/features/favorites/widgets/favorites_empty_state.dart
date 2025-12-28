@@ -88,16 +88,18 @@ class FavoritesEmptyState extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: FavoritesConstants.emptyStateButtonHorizontalPadding,
           vertical: FavoritesConstants.emptyStateButtonVerticalPadding,
+          
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(
             FavoritesConstants.emptyStateButtonBorderRadius,
           ),
         ),
+        minimumSize: const Size(150, 48),
         elevation: 0,
       ),
       child: Text(
-        'Browse Listings',
+        'Browse Properties',
         style: AppTextStyles.bodyMedium.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w600,

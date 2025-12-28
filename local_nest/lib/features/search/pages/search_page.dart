@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
-import '../../home/bloc/listing_bloc.dart';
-import '../../home/repositories/listing_repository_impl.dart';
 import '../../home/widgets/listing_card.dart';
 import '../bloc/bloc.dart';
 import '../constants/search_constants.dart';
@@ -200,17 +198,13 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ListingBloc>(
-      create: (context) => ListingBloc(
-        repository: ListingRepositoryImpl(),
-      ),
-      child: BlocProvider<SearchBloc>.value(
-        value: _searchBloc,
-        child: Scaffold(
-          backgroundColor: AppColors.background,
-          body: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
+    return BlocProvider<SearchBloc>.value(
+      value: _searchBloc,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
               // Header with search bar and filter icon
               SliverAppBar(
                 backgroundColor: AppColors.background,
@@ -326,7 +320,6 @@ class _SearchPageState extends State<SearchPage> {
           ],
         ),
       ),
-        ),
     );
   }
 
