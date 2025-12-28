@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../app/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../home/bloc/listing_bloc.dart';
+import '../../home/repositories/listing_repository_impl.dart';
 import '../../home/widgets/listing_card.dart';
 import '../bloc/bloc.dart';
 import '../constants/search_constants.dart';
@@ -11,10 +14,12 @@ import '../widgets/widgets.dart';
 
 class SearchPage extends StatefulWidget {
   final SearchRepository? repository;
+  final String? initialQuery;
 
   const SearchPage({
     super.key,
     this.repository,
+    this.initialQuery,
   });
 
   @override
@@ -47,9 +52,14 @@ class _SearchPageState extends State<SearchPage> {
     _searchBloc = SearchBloc(repository: _repository)
       ..add(const GetPopularListingsEvent());
 
-    // Load popular listings initially
+    // Load popular listings initially, or search with initial query
     Future.microtask(() {
-      _searchBloc.add(const GetPopularListingsEvent());
+      if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+        _searchController.text = widget.initialQuery!;
+        _handleSearch(widget.initialQuery!);
+      } else {
+        _searchBloc.add(const GetPopularListingsEvent());
+      }
     });
   }
 
@@ -190,119 +200,123 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<SearchBloc>.value(
-      value: _searchBloc,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // Header with search bar and filter icon
-            SliverAppBar(
-              backgroundColor: AppColors.background,
-              elevation: 0,
-              pinned: true,
-              automaticallyImplyLeading: false,
-              scrolledUnderElevation: 0,
-              toolbarHeight: SearchConstants.headerHeight,
-              flexibleSpace: Container(
-                color: AppColors.background,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: SearchConstants.horizontalPadding),
-                child: SafeArea(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          'Search Results',
-                          style: AppTextStyles.heading2.copyWith(
-                            color: AppColors.textPrimary,
-                            fontSize: 20,
+    return BlocProvider<ListingBloc>(
+      create: (context) => ListingBloc(
+        repository: ListingRepositoryImpl(),
+      ),
+      child: BlocProvider<SearchBloc>.value(
+        value: _searchBloc,
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              // Header with search bar and filter icon
+              SliverAppBar(
+                backgroundColor: AppColors.background,
+                elevation: 0,
+                pinned: true,
+                automaticallyImplyLeading: false,
+                scrolledUnderElevation: 0,
+                toolbarHeight: SearchConstants.headerHeight,
+                flexibleSpace: Container(
+                  color: AppColors.background,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: SearchConstants.horizontalPadding),
+                  child: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Search Results',
+                            style: AppTextStyles.heading2.copyWith(
+                              color: AppColors.textPrimary,
+                              fontSize: 20,
+                            ),
                           ),
                         ),
-                      ),
-                      // Search Bar with Filter Icon
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: _buildSearchBar(),
-                      ),
-                    ],
+                        // Search Bar with Filter Icon
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _buildSearchBar(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Content
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SearchConstants.horizontalPadding,
-                  vertical: SearchConstants.verticalPadding,
-                ),
-                child: BlocBuilder<SearchBloc, SearchState>(
-                  builder: (context, state) {
-                    if (state is SearchLoadingState) {
-                      return _buildLoadingState();
-                    }
+              // Content
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SearchConstants.horizontalPadding,
+                    vertical: SearchConstants.verticalPadding,
+                  ),
+                  child: BlocBuilder<SearchBloc, SearchState>(
+                    builder: (context, state) {
+                      if (state is SearchLoadingState) {
+                        return _buildLoadingState();
+                      }
 
-                    if (state is SearchErrorState) {
-                      return _buildErrorState(state.message);
-                    }
+                      if (state is SearchErrorState) {
+                        return _buildErrorState(state.message);
+                      }
 
-                    if (state is PopularListingsState) {
-                      if (state.listings.isEmpty) {
-                        return _buildEmptyState(
-                          icon: Icons.search,
-                          message: SearchConstants.noPopularListingsText,
+                      if (state is PopularListingsState) {
+                        if (state.listings.isEmpty) {
+                          return _buildEmptyState(
+                            icon: Icons.search,
+                            message: SearchConstants.noPopularListingsText,
+                          );
+                        }
+
+                        return _buildResults(
+                          state.listings,
+                          SearchConstants.popularListingsTitle,
                         );
                       }
 
-                      return _buildResults(
-                        state.listings,
-                        SearchConstants.popularListingsTitle,
-                      );
-                    }
+                      if (state is SearchSuccessState) {
+                        if (state.results.isEmpty) {
+                          return _buildEmptyState(
+                            icon: Icons.search_off,
+                            message: SearchConstants.noSearchResultsText,
+                          );
+                        }
 
-                    if (state is SearchSuccessState) {
-                      if (state.results.isEmpty) {
-                        return _buildEmptyState(
-                          icon: Icons.search_off,
-                          message: SearchConstants.noSearchResultsText,
+                        return _buildResults(
+                          state.results,
+                          '${state.results.length} Properties found',
                         );
                       }
 
-                      return _buildResults(
-                        state.results,
-                        '${state.results.length} Properties found',
-                      );
-                    }
-
-                    return const SizedBox.shrink();
-                  },
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
               ),
-            ),
 
             // Loading indicator for pagination
-            BlocBuilder<SearchBloc, SearchState>(
-              builder: (context, state) {
-                if (state is SearchLoadingMoreState) {
-                  return SliverToBoxAdapter(
-                    child: Center(
+            SliverToBoxAdapter(
+              child: BlocBuilder<SearchBloc, SearchState>(
+                builder: (context, state) {
+                  if (state is SearchLoadingMoreState) {
+                    return Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 24),
                         child: CircularProgressIndicator(
                           color: AppColors.primary,
                         ),
                       ),
-                    ),
-                  );
-                }
-                return const SliverToBoxAdapter(child: SizedBox.shrink());
-              },
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
 
             // Bottom padding
@@ -312,6 +326,7 @@ class _SearchPageState extends State<SearchPage> {
           ],
         ),
       ),
+        ),
     );
   }
 
@@ -337,12 +352,10 @@ class _SearchPageState extends State<SearchPage> {
               child: ListingCardWithBloc(
                 listing: listing,
                 onTap: () {
-                  // TODO: Navigate to listing detail page
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Navigate to ${listing.title}'),
-                      duration: const Duration(seconds: 1),
-                    ),
+                  // Navigate to listing detail page with converted model
+                  context.push(
+                    '/home/listing/${listing.id}',
+                    extra: listing.toDetailModel(),
                   );
                 },
                 onFavoriteChanged: () {

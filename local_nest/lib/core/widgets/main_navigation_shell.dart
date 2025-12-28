@@ -3,25 +3,39 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../app/theme/theme.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/search/pages/search_page.dart';
+import '../../features/favorites/favorites.dart';
 
 /// Main navigation shell with bottom navigation bar
 class MainNavigationShell extends StatefulWidget {
-  const MainNavigationShell({super.key});
+  final int? initialPageIndex;
+  final String? searchQuery;
+
+  const MainNavigationShell({
+    super.key,
+    this.initialPageIndex,
+    this.searchQuery,
+  });
 
   @override
   State<MainNavigationShell> createState() => _MainNavigationShellState();
 }
 
 class _MainNavigationShellState extends State<MainNavigationShell> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+  late List<Widget> _pages;
 
-  final List<Widget> _pages = [
-    const HomePage(),
-    const SearchPage(),
-    const _PlaceholderPage(title: 'Favorites'),
-    const _PlaceholderPage(title: 'Messages'),
-    const _PlaceholderPage(title: 'Profile'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialPageIndex ?? 0;
+    _pages = [
+      const HomePage(),
+      SearchPage(initialQuery: widget.searchQuery),
+      const FavoritesPage(),
+      const _PlaceholderPage(title: 'Messages'),
+      const _PlaceholderPage(title: 'Profile'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

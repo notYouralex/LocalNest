@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../app/theme/theme.dart';
 
 /// Reusable advanced filter modal for search and home features
-/// Filters by: price range, room type, and capacity
+/// Filters by: price range, room type, capacity, and amenities
 class AdvancedFilterModal extends StatefulWidget {
   final double? minPrice;
   final double? maxPrice;
   final String roomType; // 'all', 'solo', 'shared'
   final String capacity; // 'any', '1+', '2+', '4+'
+  final List<String> selectedAmenities;
+  final List<String> availableAmenities;
   final Function(Map<String, dynamic>) onApply;
 
   const AdvancedFilterModal({
@@ -16,6 +17,8 @@ class AdvancedFilterModal extends StatefulWidget {
     this.maxPrice,
     this.roomType = 'all',
     this.capacity = 'any',
+    this.selectedAmenities = const [],
+    this.availableAmenities = const ['WiFi', 'Air Conditioning'],
     required this.onApply,
   });
 
@@ -30,21 +33,74 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
   String? _maxPriceError;
   late String _roomType;
   late String _capacity;
+  late List<String> _selectedAmenities;
 
+  // ===== DESIGN CONSTANTS =====
+
+  // Spacing
   static const double _horizontalPadding = 24;
-  static const double _sectionSpacing = 24;
+  static const double _verticalPadding = 16;
+  static const double _sectionSpacing = 12;
   static const double _itemSpacing = 12;
-  static const double _sectionTitleFontSize = 16;
+  static const double _titleBottomSpacing = 24;
+
+  // Border radius
+  static const double _buttonBorderRadius = 14;
+  static const double _inputBorderRadius = 8;
+  static const double _modalBorderRadius = 16;
+
+  // Colors
+  static const Color _selectedColorStart = Color(0xFF06b6d4); // Cyan
+  static const Color _selectedColorEnd = Color(0xFF0891b2); // Darker cyan
+  static const Color _unselectedColor = Colors.white;
+  static const Color _unselectedBorder = Color(0xFFe2e8f0);
+  static const Color _headerDarkStart = Color(0xFF0f172a);
+  static const Color _headerDarkEnd = Color(0xFF1e293b);
+  static const Color _textPrimary = Color(0xFF0f172a);
+  static const Color _textSecondary = Color(0xFF64748b);
+  static const Color _textTertiary = Color(0xFF94a3b8);
+  static const Color _lightBg = Color(0xFFf8fafc);
+  static const Color _borderColor = Color(0xFFe2e8f0);
+
+  // Text styles
+  static const TextStyle _sectionTitleStyle = TextStyle(
+    color: _textPrimary,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle _labelStyle = TextStyle(
+    color: _textSecondary,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle _buttonTextStyle = TextStyle(
+    color: _textPrimary,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle _buttonTextSelectedStyle = TextStyle(
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+  );
+
+  // ===== LIFECYCLE =====
 
   @override
   void initState() {
     super.initState();
-    _minPriceController =
-        TextEditingController(text: widget.minPrice?.toInt().toString() ?? '');
-    _maxPriceController =
-        TextEditingController(text: widget.maxPrice?.toInt().toString() ?? '');
+    _minPriceController = TextEditingController(
+      text: widget.minPrice?.toInt().toString() ?? '',
+    );
+    _maxPriceController = TextEditingController(
+      text: widget.maxPrice?.toInt().toString() ?? '',
+    );
     _roomType = widget.roomType;
     _capacity = widget.capacity;
+    _selectedAmenities = List.from(widget.selectedAmenities);
   }
 
   @override
@@ -54,202 +110,280 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
     super.dispose();
   }
 
-  void _validateMinPrice(String value) {
+  // ===== PRICE VALIDATION =====
+
+  void _validatePriceField(String value, bool isMinPrice) {
     setState(() {
+      final otherController = isMinPrice
+          ? _maxPriceController
+          : _minPriceController;
+
       if (value.isEmpty) {
+        if (isMinPrice) {
+          _minPriceError = null;
+        } else {
+          _maxPriceError = null;
+        }
+        return;
+      }
+
+      final price = double.tryParse(value);
+
+      // Check for invalid input
+      if (price == null) {
+        if (isMinPrice) {
+          _minPriceError = 'Invalid price';
+        } else {
+          _maxPriceError = 'Invalid price';
+        }
+        return;
+      }
+
+      // Check for negative values
+      if (price < 0) {
+        if (isMinPrice) {
+          _minPriceError = 'Price cannot be negative';
+        } else {
+          _maxPriceError = 'Price cannot be negative';
+        }
+        return;
+      }
+
+      // Check for price range consistency
+      if (otherController.text.isNotEmpty) {
+        final otherPrice = double.tryParse(otherController.text);
+        if (otherPrice != null) {
+          if (isMinPrice && price > otherPrice) {
+            _minPriceError = 'Min price cannot exceed max';
+            return;
+          } else if (!isMinPrice && price < otherPrice) {
+            _maxPriceError = 'Max price cannot be less than min';
+            return;
+          }
+        }
+      }
+
+      // Clear error
+      if (isMinPrice) {
         _minPriceError = null;
       } else {
-        final price = double.tryParse(value);
-        if (price == null) {
-          _minPriceError = 'Invalid price';
-        } else if (price < 0) {
-          _minPriceError = 'Price cannot be negative';
-        } else if (_maxPriceController.text.isNotEmpty) {
-          final maxPrice = double.tryParse(_maxPriceController.text);
-          if (maxPrice != null && price > maxPrice) {
-            _minPriceError = 'Min price cannot exceed max';
-          } else {
-            _minPriceError = null;
-          }
-        } else {
-          _minPriceError = null;
-        }
+        _maxPriceError = null;
       }
     });
   }
 
-  void _validateMaxPrice(String value) {
-    setState(() {
-      if (value.isEmpty) {
-        _maxPriceError = null;
-      } else {
-        final price = double.tryParse(value);
-        if (price == null) {
-          _maxPriceError = 'Invalid price';
-        } else if (price < 0) {
-          _maxPriceError = 'Price cannot be negative';
-        } else if (_minPriceController.text.isNotEmpty) {
-          final minPrice = double.tryParse(_minPriceController.text);
-          if (minPrice != null && price < minPrice) {
-            _maxPriceError = 'Max price cannot be less than min';
-          } else {
-            _maxPriceError = null;
-          }
-        } else {
-          _maxPriceError = null;
-        }
-      }
-    });
-  }
+  // ===== BUILD =====
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF1F2937),
+        color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+          topLeft: Radius.circular(_modalBorderRadius),
+          topRight: Radius.circular(_modalBorderRadius),
         ),
       ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [_buildHeader(), _buildContent(), _buildActionButtons()],
+      ),
+    );
+  }
+
+  // ===== HEADER =====
+
+  Widget _buildHeader() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [_headerDarkStart, _headerDarkEnd],
+        ),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(_modalBorderRadius),
+          topRight: Radius.circular(_modalBorderRadius),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: _horizontalPadding,
+        vertical: _verticalPadding,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Filters',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===== CONTENT =====
+
+  Widget _buildContent() {
+    return Expanded(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: _horizontalPadding,
-            right: _horizontalPadding,
-            top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Filters',
-                    style: AppTextStyles.heading2.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: _sectionSpacing),
-
-              // Price Range Section
-              Text(
-                'Price Range',
-                style: AppTextStyles.heading2.copyWith(
-                  color: Colors.white,
-                  fontSize: _sectionTitleFontSize,
-                ),
-              ),
-              const SizedBox(height: _itemSpacing),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildPriceInput(
-                      label: 'Min',
-                      controller: _minPriceController,
-                      error: _minPriceError,
-                      onChanged: _validateMinPrice,
-                    ),
-                  ),
-                  const SizedBox(width: _itemSpacing),
-                  Expanded(
-                    child: _buildPriceInput(
-                      label: 'Max',
-                      controller: _maxPriceController,
-                      error: _maxPriceError,
-                      onChanged: _validateMaxPrice,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: _sectionSpacing),
-
-              // Room Type Section
-              Text(
-                'Room Type',
-                style: AppTextStyles.heading2.copyWith(
-                  color: Colors.white,
-                  fontSize: _sectionTitleFontSize,
-                ),
-              ),
-              const SizedBox(height: _itemSpacing),
-              _buildRoomTypeChips(),
-              const SizedBox(height: _sectionSpacing),
-
-              // Capacity Section
-              Text(
-                'Minimum Capacity',
-                style: AppTextStyles.heading2.copyWith(
-                  color: Colors.white,
-                  fontSize: _sectionTitleFontSize,
-                ),
-              ),
-              const SizedBox(height: _itemSpacing),
-              _buildCapacityChips(),
-              const SizedBox(height: 32),
-
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _resetFilters,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'Reset',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: _itemSpacing),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _applyFilters,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'Apply Filters',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+        padding: const EdgeInsets.all(_horizontalPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle('Price Range'),
+            const SizedBox(height: _sectionSpacing),
+            _buildPriceSection(),
+            const SizedBox(height: _titleBottomSpacing),
+            _buildSectionTitle('Room Type'),
+            const SizedBox(height: _sectionSpacing),
+            _buildRoomTypeSection(),
+            const SizedBox(height: _titleBottomSpacing),
+            _buildSectionTitle('Minimum Capacity'),
+            const SizedBox(height: _sectionSpacing),
+            _buildCapacitySection(),
+            const SizedBox(height: _titleBottomSpacing),
+            _buildSectionTitle('Amenities'),
+            const SizedBox(height: _sectionSpacing),
+            _buildAmenitiesSection(),
+          ],
         ),
       ),
     );
   }
+
+  // ===== SECTIONS =====
+
+  Widget _buildSectionTitle(String title) {
+    return Text(title, style: _sectionTitleStyle);
+  }
+
+  Widget _buildPriceSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildPriceInput(
+            label: 'Min',
+            controller: _minPriceController,
+            error: _minPriceError,
+            onChanged: (value) => _validatePriceField(value, true),
+          ),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildPriceInput(
+            label: 'Max',
+            controller: _maxPriceController,
+            error: _maxPriceError,
+            onChanged: (value) => _validatePriceField(value, false),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoomTypeSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildSelectButton(
+            label: 'All',
+            isSelected: _roomType == 'all',
+            onTap: () => setState(() => _roomType = 'all'),
+          ),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildSelectButton(
+            label: 'Solo',
+            isSelected: _roomType == 'solo',
+            onTap: () => setState(() => _roomType = 'solo'),
+          ),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildSelectButton(
+            label: 'Shared',
+            isSelected: _roomType == 'shared',
+            onTap: () => setState(() => _roomType = 'shared'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCapacitySection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildSelectButton(
+            label: 'Any',
+            isSelected: _capacity == 'any',
+            onTap: () => setState(() => _capacity = 'any'),
+          ),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildSelectButton(
+            label: '1+',
+            isSelected: _capacity == '1+',
+            onTap: () => setState(() => _capacity = '1+'),
+          ),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildSelectButton(
+            label: '2+',
+            isSelected: _capacity == '2+',
+            onTap: () => setState(() => _capacity = '2+'),
+          ),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildSelectButton(
+            label: '4+',
+            isSelected: _capacity == '4+',
+            onTap: () => setState(() => _capacity = '4+'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAmenitiesSection() {
+    return Wrap(
+      spacing: _itemSpacing,
+      runSpacing: _itemSpacing,
+      children: widget.availableAmenities.map((amenity) {
+        final isSelected = _selectedAmenities.contains(amenity);
+        return IntrinsicWidth(
+          child: _buildSelectButton(
+            label: amenity,
+            isSelected: isSelected,
+            onTap: () {
+              setState(() {
+                if (isSelected) {
+                  _selectedAmenities.remove(amenity);
+                } else {
+                  _selectedAmenities.add(amenity);
+                }
+              });
+            },
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // ===== WIDGETS =====
 
   Widget _buildPriceInput({
     required String label,
@@ -260,12 +394,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
+        Text(label, style: _labelStyle),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
@@ -273,21 +402,19 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '0',
-            hintStyle: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            hintStyle: const TextStyle(color: _textTertiary, fontSize: 14),
             filled: true,
-            fillColor: AppColors.surface,
+            fillColor: _unselectedColor,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.divider),
+              borderRadius: BorderRadius.circular(_inputBorderRadius),
+              borderSide: const BorderSide(color: _unselectedBorder),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.divider),
+              borderRadius: BorderRadius.circular(_inputBorderRadius),
+              borderSide: const BorderSide(color: _unselectedBorder),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(_inputBorderRadius),
               borderSide: const BorderSide(color: Colors.red, width: 1),
             ),
             contentPadding: const EdgeInsets.symmetric(
@@ -295,17 +422,15 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
               vertical: 10,
             ),
             errorText: error,
-            errorStyle: AppTextStyles.bodySmall.copyWith(
-              color: Colors.red,
-              fontSize: 12,
-            ),
+            errorStyle: const TextStyle(color: Colors.red, fontSize: 12),
           ),
+          style: const TextStyle(color: _textPrimary, fontSize: 14),
         ),
       ],
     );
   }
 
-  Widget _buildFilterChip({
+  Widget _buildSelectButton({
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
@@ -313,80 +438,113 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.divider,
-          ),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: _buildButtonDecoration(isSelected),
         child: Text(
           label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: isSelected ? Colors.white : AppColors.textPrimary,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-          ),
+          style: isSelected ? _buttonTextSelectedStyle : _buttonTextStyle,
+          textAlign: TextAlign.center,
         ),
       ),
     );
   }
 
-  Widget _buildRoomTypeChips() {
-    return Row(
-      children: [
-        _buildFilterChip(
-          label: 'All',
-          isSelected: _roomType == 'all',
-          onTap: () => setState(() => _roomType = 'all'),
-        ),
-        const SizedBox(width: _itemSpacing),
-        _buildFilterChip(
-          label: 'Solo',
-          isSelected: _roomType == 'solo',
-          onTap: () => setState(() => _roomType = 'solo'),
-        ),
-        const SizedBox(width: _itemSpacing),
-        _buildFilterChip(
-          label: 'Shared',
-          isSelected: _roomType == 'shared',
-          onTap: () => setState(() => _roomType = 'shared'),
-        ),
-      ],
+  // ===== ACTION BUTTONS =====
+
+  Widget _buildActionButtons() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: _borderColor)),
+      ),
+      padding: const EdgeInsets.all(_horizontalPadding),
+      child: Row(
+        children: [
+          Expanded(child: _buildResetButton()),
+          const SizedBox(width: _itemSpacing),
+          Expanded(child: _buildApplyButton()),
+        ],
+      ),
     );
   }
 
-  Widget _buildCapacityChips() {
-    return Row(
-      children: [
-        _buildFilterChip(
-          label: 'Any',
-          isSelected: _capacity == 'any',
-          onTap: () => setState(() => _capacity = 'any'),
+  Widget _buildResetButton() {
+    return GestureDetector(
+      onTap: _resetFilters,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_buttonBorderRadius),
+          color: _lightBg,
+          border: Border.all(color: _borderColor),
         ),
-        const SizedBox(width: _itemSpacing),
-        _buildFilterChip(
-          label: '1+',
-          isSelected: _capacity == '1+',
-          onTap: () => setState(() => _capacity = '1+'),
+        child: const Text(
+          'Reset',
+          style: _buttonTextStyle,
+          textAlign: TextAlign.center,
         ),
-        const SizedBox(width: _itemSpacing),
-        _buildFilterChip(
-          label: '2+',
-          isSelected: _capacity == '2+',
-          onTap: () => setState(() => _capacity = '2+'),
-        ),
-        const SizedBox(width: _itemSpacing),
-        _buildFilterChip(
-          label: '4+',
-          isSelected: _capacity == '4+',
-          onTap: () => setState(() => _capacity = '4+'),
-        ),
-      ],
+      ),
     );
+  }
+
+  Widget _buildApplyButton() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: _buildSelectedButtonDecoration(),
+      child: GestureDetector(
+        onTap: _applyFilters,
+        child: const Text(
+          'Apply Filters',
+          style: _buttonTextSelectedStyle,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  // ===== HELPERS =====
+
+  BoxDecoration _buildButtonDecoration(bool isSelected) {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(_buttonBorderRadius),
+      gradient: isSelected
+          ? const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [_selectedColorStart, _selectedColorEnd],
+            )
+          : null,
+      color: isSelected ? null : _unselectedColor,
+      border: !isSelected ? Border.all(color: _unselectedBorder) : null,
+      boxShadow: isSelected ? _buildButtonShadow() : null,
+    );
+  }
+
+  BoxDecoration _buildSelectedButtonDecoration() {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(_buttonBorderRadius),
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [_selectedColorStart, _selectedColorEnd],
+      ),
+      boxShadow: _buildButtonShadow(),
+    );
+  }
+
+  List<BoxShadow> _buildButtonShadow() {
+    return [
+      BoxShadow(
+        color: _selectedColorStart.withOpacity(0.3),
+        blurRadius: 15,
+        offset: const Offset(0, 10),
+      ),
+      BoxShadow(
+        color: _selectedColorStart.withOpacity(0.3),
+        blurRadius: 6,
+        offset: const Offset(0, 4),
+      ),
+    ];
   }
 
   void _resetFilters() {
@@ -395,6 +553,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
       _maxPriceController.clear();
       _roomType = 'all';
       _capacity = 'any';
+      _selectedAmenities.clear();
       _minPriceError = null;
       _maxPriceError = null;
     });
@@ -410,7 +569,9 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
           : double.tryParse(_maxPriceController.text),
       'roomType': _roomType,
       'capacity': _capacity,
+      'amenities': _selectedAmenities,
     });
-    Navigator.pop(context);
+    // Note: Navigation should be handled by the parent wrapper (HomeFilterModal, SearchFilterModal)
+    // This ensures proper route management in showModalBottomSheet context
   }
 }

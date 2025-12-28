@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/core.dart';
 import '../../features/authentication/authentication.dart';
 import '../../features/authentication/services/auth_service_provider.dart';
+import '../../features/listing_detail/listing_detail.dart';
 
 /// Route paths constants
 class AppRoutes {
@@ -105,6 +106,36 @@ class AppRouter {
         path: AppRoutes.home,
         name: 'home',
         builder: (context, state) => const MainNavigationShell(),
+        routes: [
+          // Search route with query parameter
+          GoRoute(
+            path: 'search',
+            name: 'search',
+            builder: (context, state) {
+              final query = state.extra as String? ?? '';
+              return MainNavigationShell(
+                initialPageIndex: 1,
+                searchQuery: query,
+              );
+            },
+          ),
+
+          // Listing detail route
+          GoRoute(
+            path: 'listing/:id',
+            name: 'listingDetail',
+            builder: (context, state) {
+              final listing = state.extra as ListingDetail?;
+              if (listing == null) {
+                return Scaffold(
+                  appBar: AppBar(title: const Text('Listing Not Found')),
+                  body: const Center(child: Text('Listing details not found')),
+                );
+              }
+              return ListingDetailPage(listing: listing);
+            },
+          ),
+        ],
       ),
     ],
   );

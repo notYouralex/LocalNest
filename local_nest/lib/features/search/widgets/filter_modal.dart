@@ -40,6 +40,8 @@ class _FilterModalState extends State<FilterModal> {
     );
 
     widget.onApplyFilters(_filter);
+    // Pop the modal after applying filters
+    Navigator.pop(context);
   }
 
   @override

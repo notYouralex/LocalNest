@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
   void _handleSearch(String query) {
     // Navigate to search page with query parameter
     if (query.isNotEmpty) {
-      context.push('/search?q=$query');
+      context.push('/home/search', extra: query);
     }
   }
 
@@ -215,8 +215,11 @@ class _HomePageState extends State<HomePage> {
         return ListingCardWithBloc(
           listing: listing,
           onTap: () {
-            // TODO: Navigate to listing detail page
-            // context.push('/listing/${listing.id}');
+            // Navigate to listing detail page with converted model
+            context.push(
+              '/home/listing/${listing.id}',
+              extra: listing.toDetailModel(),
+            );
           },
           onFavoriteChanged: () {
             // Favorite status changed via BLoC
