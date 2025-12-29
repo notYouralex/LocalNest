@@ -89,3 +89,27 @@ class GetSearchSuggestionsEvent extends SearchEvent {
 class ClearSearchEvent extends SearchEvent {
   const ClearSearchEvent();
 }
+
+/// Event to apply filters to current search
+class ApplyFiltersEvent extends SearchEvent {
+  final SearchFilter filter;
+  final String? currentQuery;
+
+  const ApplyFiltersEvent(
+    this.filter, {
+    this.currentQuery,
+  });
+
+  @override
+  List<Object?> get props => [filter, currentQuery];
+}
+
+/// Event to clear applied filters
+class ClearFiltersEvent extends SearchEvent {
+  final String? currentQuery;
+
+  const ClearFiltersEvent({this.currentQuery});
+
+  @override
+  List<Object?> get props => [currentQuery];
+}

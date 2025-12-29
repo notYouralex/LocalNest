@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../models/models.dart';
 import '../repositories/repositories.dart';
 import 'search_event.dart';
 import 'search_state.dart';
@@ -7,6 +8,8 @@ import 'search_state.dart';
 /// Handles search queries, filtering, and pagination
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final SearchRepository repository;
+  SearchFilter _currentFilter = const SearchFilter();
+  String _currentQuery = '';
 
   SearchBloc({required this.repository}) : super(const SearchInitialState()) {
     // Register event handlers
@@ -16,6 +19,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     on<LoadMoreSearchResultsEvent>(_onLoadMoreResults);
     on<GetSearchSuggestionsEvent>(_onGetSuggestions);
     on<ClearSearchEvent>(_onClearSearch);
+    on<ApplyFiltersEvent>(_onApplyFilters);
+    on<ClearFiltersEvent>(_onClearFilters);
   }
 
   /// Handle getting popular listings
@@ -47,6 +52,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     emit(const SearchLoadingState());
+    _currentQuery = event.query;
+    _currentFilter = const SearchFilter();
 
     try {
       final results = await repository.searchListings(
@@ -61,6 +68,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         currentOffset: event.offset,
         totalResults: results.length,
         hasMoreResults: results.length == event.limit,
+        activeFilter: _currentFilter,
       ));
     } catch (e) {
       emit(SearchErrorState('Failed to search: ${e.toString()}'));
@@ -73,6 +81,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     emit(const SearchLoadingState());
+    _currentQuery = event.query;
+    _currentFilter = event.filter;
 
     try {
       final results = await repository.searchWithFilters(
@@ -88,6 +98,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         currentOffset: event.offset,
         totalResults: results.length,
         hasMoreResults: results.length == event.limit,
+        activeFilter: event.filter,
       ));
     } catch (e) {
       emit(SearchErrorState('Failed to search with filters: ${e.toString()}'));
@@ -104,6 +115,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       emit(SearchLoadingMoreState(
         currentResults: currentState.results,
         query: event.query,
+        activeFilter: _currentFilter,
       ));
 
       try {
@@ -128,6 +140,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           currentOffset: event.offset,
           totalResults: allResults.length,
           hasMoreResults: newResults.length == event.limit,
+          activeFilter: _currentFilter,
         ));
       } catch (e) {
         emit(SearchErrorState('Failed to load more results: ${e.toString()}'));
@@ -153,6 +166,71 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     ClearSearchEvent event,
     Emitter<SearchState> emit,
   ) async {
+    _currentQuery = '';
+    _currentFilter = const SearchFilter();
     emit(const SearchInitialState());
+  }
+
+  /// Handle applying filters
+  Future<void> _onApplyFilters(
+    ApplyFiltersEvent event,
+    Emitter<SearchState> emit,
+  ) async {
+    _currentFilter = event.filter;
+
+    // If there's a current query, search with filters
+    if (event.currentQuery != null && event.currentQuery!.isNotEmpty) {
+      emit(const SearchLoadingState());
+      try {
+        final results = await repository.searchWithFilters(
+          event.currentQuery!,
+          event.filter,
+          limit: 10,
+          offset: 0,
+        );
+
+        emit(SearchSuccessState(
+          results: results,
+          query: event.currentQuery!,
+          currentOffset: 0,
+          totalResults: results.length,
+          hasMoreResults: results.length == 10,
+          activeFilter: event.filter,
+        ));
+      } catch (e) {
+        emit(SearchErrorState('Failed to apply filters: ${e.toString()}'));
+      }
+    }
+  }
+
+  /// Handle clearing filters
+  Future<void> _onClearFilters(
+    ClearFiltersEvent event,
+    Emitter<SearchState> emit,
+  ) async {
+    _currentFilter = const SearchFilter();
+
+    // If there's a current query, search without filters
+    if (event.currentQuery != null && event.currentQuery!.isNotEmpty) {
+      emit(const SearchLoadingState());
+      try {
+        final results = await repository.searchListings(
+          event.currentQuery!,
+          limit: 10,
+          offset: 0,
+        );
+
+        emit(SearchSuccessState(
+          results: results,
+          query: event.currentQuery!,
+          currentOffset: 0,
+          totalResults: results.length,
+          hasMoreResults: results.length == 10,
+          activeFilter: const SearchFilter(),
+        ));
+      } catch (e) {
+        emit(SearchErrorState('Failed to clear filters: ${e.toString()}'));
+      }
+    }
   }
 }

@@ -16,7 +16,7 @@ class SearchConstants {
   static const double borderRadius = 16;
 
   // Search Bar
-  static const String searchHintText = 'Search location, price...';
+  static const String searchHintText = 'Search location, price or type...';
 
   // Empty States
   static const String noPopularListingsText = 'No listings found';

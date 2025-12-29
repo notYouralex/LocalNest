@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../home/models/listing_model.dart';
+import '../models/models.dart';
 
 /// Abstract class for search states
 abstract class SearchState extends Equatable {
@@ -26,6 +27,7 @@ class SearchSuccessState extends SearchState {
   final int currentOffset;
   final int totalResults;
   final bool hasMoreResults;
+  final SearchFilter activeFilter;
 
   const SearchSuccessState({
     required this.results,
@@ -33,24 +35,27 @@ class SearchSuccessState extends SearchState {
     this.currentOffset = 0,
     this.totalResults = 0,
     this.hasMoreResults = false,
+    this.activeFilter = const SearchFilter(),
   });
 
   @override
-  List<Object?> get props => [results, query, currentOffset, totalResults, hasMoreResults];
+  List<Object?> get props => [results, query, currentOffset, totalResults, hasMoreResults, activeFilter];
 }
 
 /// Loading more results state - pagination in progress
 class SearchLoadingMoreState extends SearchState {
   final List<ListingModel> currentResults;
   final String query;
+  final SearchFilter activeFilter;
 
   const SearchLoadingMoreState({
     required this.currentResults,
     required this.query,
+    this.activeFilter = const SearchFilter(),
   });
 
   @override
-  List<Object?> get props => [currentResults, query];
+  List<Object?> get props => [currentResults, query, activeFilter];
 }
 
 /// Error state - search failed
@@ -87,4 +92,20 @@ class PopularListingsState extends SearchState {
 
   @override
   List<Object?> get props => [listings, currentOffset, hasMoreResults];
+}
+
+/// State for filters being applied
+class FiltersAppliedState extends SearchState {
+  final SearchFilter filter;
+  final List<ListingModel> results;
+  final String query;
+
+  const FiltersAppliedState({
+    required this.filter,
+    required this.results,
+    required this.query,
+  });
+
+  @override
+  List<Object?> get props => [filter, results, query];
 }

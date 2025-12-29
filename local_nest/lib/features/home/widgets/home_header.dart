@@ -6,11 +6,7 @@ class HomeHeader extends StatefulWidget {
   final Function(String)? onSearch;
   final VoidCallback? onFilterTap;
 
-  const HomeHeader({
-    super.key,
-    this.onSearch,
-    this.onFilterTap,
-  });
+  const HomeHeader({super.key, this.onSearch, this.onFilterTap});
 
   @override
   State<HomeHeader> createState() => _HomeHeaderState();
@@ -55,7 +51,7 @@ class _HomeHeaderState extends State<HomeHeader> {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      padding: const EdgeInsets.fromLTRB(24, 48, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -100,7 +96,7 @@ class _HomeHeaderState extends State<HomeHeader> {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Search Bar
           Container(
             decoration: BoxDecoration(
@@ -117,14 +113,6 @@ class _HomeHeaderState extends State<HomeHeader> {
             child: Row(
               children: [
                 // Search Icon
-                Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Icon(
-                    Icons.search,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                ),
                 // Input Field
                 Expanded(
                   child: TextField(
@@ -132,6 +120,32 @@ class _HomeHeaderState extends State<HomeHeader> {
                     onSubmitted: (_) => _handleSearch(),
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 2),
+                        child: SvgPicture.asset(
+                          'assets/icons/search_notclicked.svg',
+                          fit: BoxFit.scaleDown,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.only(right: 2),
+                        child: GestureDetector(
+                          onTap: widget.onFilterTap,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.tune,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
                       hintText: 'Search location, price, or type...',
                       hintStyle: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textSecondary,
@@ -146,25 +160,8 @@ class _HomeHeaderState extends State<HomeHeader> {
                     ),
                   ),
                 ),
+
                 // Filter Button
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: GestureDetector(
-                    onTap: widget.onFilterTap,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.tune,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
