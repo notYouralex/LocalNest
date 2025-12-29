@@ -7,6 +7,8 @@ import '../../features/home/repositories/listing_repository_impl.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/search/pages/search_page.dart';
 import '../../features/favorites/favorites.dart';
+import '../../features/messages/messages.dart';
+import '../../features/profile/profile.dart';
 
 /// Main navigation shell with bottom navigation bar
 class MainNavigationShell extends StatefulWidget {
@@ -40,8 +42,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       const HomePage(),
       SearchPage(initialQuery: widget.searchQuery),
       FavoritesPage(),
-      const _PlaceholderPage(title: 'Messages'),
-      const _PlaceholderPage(title: 'Profile'),
+      const MessagesPage(),
+      const ProfilePage(),
     ];
   }
 
@@ -162,65 +164,5 @@ class _NavItem extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Temporary placeholder page for dummy content
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          title,
-          style: AppTextStyles.heading2.copyWith(color: AppColors.textPrimary),
-        ),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _getIconForTitle(title),
-              size: 64,
-              color: AppColors.primary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text('$title Page', style: AppTextStyles.heading2),
-            const SizedBox(height: 8),
-            Text(
-              'Coming Soon',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  IconData _getIconForTitle(String title) {
-    switch (title) {
-      case 'Home':
-        return Icons.home_rounded;
-      case 'Search':
-        return Icons.search_rounded;
-      case 'Favorites':
-        return Icons.favorite_rounded;
-      case 'Messages':
-        return Icons.message_rounded;
-      case 'Profile':
-        return Icons.person_rounded;
-      default:
-        return Icons.circle;
-    }
   }
 }

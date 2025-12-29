@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'login_auth_service.dart';
 import 'sign_up_auth.dart';
 import 'firebase_auth_service.dart';
@@ -22,5 +23,15 @@ class AuthServiceProvider {
   /// Get sign up auth service
   static SignUpAuthService getSignUpAuthService() {
     return _signUpAuthService;
+  }
+
+  /// Check if user is authenticated
+  static bool isAuthenticated() {
+    return FirebaseAuth.instance.currentUser != null;
+  }
+
+  /// Get current user
+  static User? getCurrentUser() {
+    return FirebaseAuth.instance.currentUser;
   }
 }

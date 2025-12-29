@@ -3,9 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../home/models/listing_model.dart';
 import '../../home/widgets/listing_card.dart';
 import '../constants/search_constants.dart';
-import '../models/models.dart';
 import '../../../app/theme/theme.dart';
-import '../../../core/widgets/widgets.dart';
 
 /// Widget that displays search results in a list
 class SearchResultsView extends StatelessWidget {
