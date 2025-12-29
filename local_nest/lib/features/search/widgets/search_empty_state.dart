@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../app/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
 
 /// Widget that displays when search results are empty

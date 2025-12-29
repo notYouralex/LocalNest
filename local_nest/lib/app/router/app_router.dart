@@ -6,6 +6,7 @@ import '../../features/authentication/authentication.dart';
 import '../../features/authentication/services/auth_service_provider.dart';
 import '../../features/listing_detail/listing_detail.dart';
 import '../../features/messages/messages.dart';
+import '../../features/profile/pages/manage_listings_page.dart';
 
 /// Route paths constants
 class AppRoutes {
@@ -220,7 +221,21 @@ class AppRouter {
               ),
             ],
           ),
+
+          // Manage Listings route
+          GoRoute(
+            path: 'manage-listings',
+            name: 'manageListings',
+            builder: (context, state) => const ManageListingsPage(),
+          ),
         ],
+      ),
+
+      // Manage Listings route (top-level)
+      GoRoute(
+        path: '/manage-listings',
+        name: 'manageListingsTopLevel',
+        builder: (context, state) => const ManageListingsPage(),
       ),
 
       // Error/Fallback route for unmatched paths

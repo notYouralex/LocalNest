@@ -50,6 +50,15 @@ class AppColors {
   static const Color error = Color(0xFFEF4444);
   static const Color warning = Color(0xFFF59E0B);  // Amber for price
 
+  // Stat Card Background Colors
+  static const Color statCardFavoritesBackground = Color(0xFF2bb3a3);  // Teal
+  static const Color statCardMessagesBackground = Color(0xFFdcfce7);   // Light green
+  static const Color statCardAlertsBackground = Color(0xFFF3E8FF);     // Light purple
+
+  // Cyan/Teal (for price display and buttons)
+  static const Color cyan = Color(0xFF06b6d4);
+  static const Color cyanDark = Color(0xFF0891b2);
+
   // Social Button Colors
   static const Color google = Color(0xFFDB4437);
   static const Color facebook = Color(0xFF1877F2);

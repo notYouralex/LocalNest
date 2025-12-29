@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../models/models.dart';
 
 /// Abstract class for messages events
 abstract class MessagesEvent extends Equatable {
