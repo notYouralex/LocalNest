@@ -52,6 +52,9 @@ dependencies:
   # Local storage & security
   flutter_secure_storage: ^9.2.0
   shared_preferences: ^2.2.0
+  
+  # Image picker
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:

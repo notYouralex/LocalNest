@@ -9,7 +9,6 @@ import 'search_state.dart';
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final SearchRepository repository;
   SearchFilter _currentFilter = const SearchFilter();
-  String _currentQuery = '';
 
   SearchBloc({required this.repository}) : super(const SearchInitialState()) {
     // Register event handlers
@@ -52,7 +51,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     emit(const SearchLoadingState());
-    _currentQuery = event.query;
     _currentFilter = const SearchFilter();
 
     try {
@@ -81,7 +79,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     emit(const SearchLoadingState());
-    _currentQuery = event.query;
     _currentFilter = event.filter;
 
     try {
@@ -166,7 +163,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     ClearSearchEvent event,
     Emitter<SearchState> emit,
   ) async {
-    _currentQuery = '';
     _currentFilter = const SearchFilter();
     emit(const SearchInitialState());
   }

@@ -54,11 +54,21 @@ class ProfileHeader extends StatelessWidget {
                   fontSize: 20,
                 ),
               ),
-              IconButton(
-                onPressed: onEditPressed,
-                icon: const Icon(Icons.edit),
-                color: AppColors.textWhite,
-                iconSize: 20,
+              Ink(
+                child: InkWell(
+                  onTap: onEditPressed,
+                  splashColor: AppColors.textWhite.withOpacity(0.2),
+                  highlightColor: AppColors.textWhite.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(24),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Icon(
+                      Icons.edit,
+                      color: AppColors.textWhite,
+                      size: 20,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

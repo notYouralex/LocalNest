@@ -92,42 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// Legacy async load - replaced with sync init above
-  Future<void> _loadUserData() async {
-    try {
-      setState(() => _isLoading = true);
-      
-      // TODO: Replace with actual Firebase call
-      await Future.delayed(const Duration(milliseconds: 300));
-      
-      _userProfile = UserProfile(
-        id: '1',
-        name: 'Juan Dela Cruz',
-        email: 'juandc@email.com',
-        accountType: 'renter',
-        isVerified: false,
-      );
-      
-      _notificationSettings = NotificationSettings(
-        newListings: true,
-        messages: true,
-        availability: false,
-      );
-      
-      _renterStats = RenterStats(
-        favorites: ProfileConstants.defaultFavorites,
-        messages: ProfileConstants.defaultMessages,
-        alerts: ProfileConstants.defaultAlerts,
-      );
-      
-      setState(() => _isLoading = false);
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load profile: $e';
-        _isLoading = false;
-      });
-    }
-  }
+
 
   void _handleAccountTypeChange(String type) {
     setState(() {
@@ -162,24 +127,46 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _handleSavedSearches() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Saved Searches - Coming Soon')),
-    );
-    // TODO: Navigate to saved searches page
+    // Navigate to search page
+    context.goNamed('search', extra: '');
   }
 
   void _handlePrivacySafety() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Privacy & Safety - Coming Soon')),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Privacy & Safety'),
+        content: const Text(
+          'Privacy and safety settings are coming soon. '
+          'You can manage your account settings here once available.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
-    // TODO: Navigate to privacy settings page
   }
 
   void _handleHelpSupport() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Help & Support - Coming Soon')),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Help & Support'),
+        content: const Text(
+          'Help and support resources are coming soon. '
+          'Contact our support team at support@localnest.com',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
-    // TODO: Navigate to help/support page
   }
 
   void _handleLogout() {
@@ -195,8 +182,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           TextButton(
             onPressed: () {
+              Navigator.pop(context);
               // TODO: Call logout from auth service
-              context.go('/login');
+              context.goNamed('login');
             },
             child: Text(
               ProfileConstants.logoutLabel,
@@ -293,7 +281,7 @@ class _ProfilePageState extends State<ProfilePage> {
             height: 44,
             child: ElevatedButton.icon(
               onPressed: () {
-                context.push('/manage-listings');
+                context.goNamed('manageListings');
               },
               icon: const Icon(Icons.home, size: 18),
               label: Text(
@@ -349,7 +337,13 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _loadUserData,
+                onPressed: () {
+                  setState(() {
+                    _errorMessage = null;
+                    _isLoading = true;
+                  });
+                  _initializeData();
+                },
                 child: const Text('Retry'),
               ),
             ],

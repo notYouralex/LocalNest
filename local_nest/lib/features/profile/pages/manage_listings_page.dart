@@ -4,6 +4,7 @@ import '../constants/manage_listings_constants.dart';
 import '../models/listing_model.dart';
 import '../presentation/widgets/listing_card.dart';
 import '../presentation/widgets/add_listing_button.dart';
+import 'add_listing_page.dart';
 
 /// Manage Listings page for landlords
 /// Shows all property listings with management options
@@ -169,37 +170,22 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
   ListingsStats _getStats() => ListingsStats.fromListings(_listings);
 
   void _handleAddListing() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(ManageListingsConstants.addListingComingSoon),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddListingPage(),
       ),
-    );
-    // TODO: Navigate to create listing page
+    ).then((result) {
+      if (result == true) {
+        // Refresh listings after new listing is added
+        _initializeData();
+      }
+    });
   }
 
   void _handleToggleListing(Listing listing) {
     setState(() {
       final index = _listings.indexWhere((l) => l.id == listing.id);
-      if (index != -1) {
-        _listings[index] = _listings[index].toggleStatus();
-      }
-    });
-    // TODO: Save to backend
-  }
-
-  void _handleDeactivateListing(String id) {
-    setState(() {
-      final index = _listings.indexWhere((l) => l.id == id);
-      if (index != -1) {
-        _listings[index] = _listings[index].toggleStatus();
-      }
-    });
-    // TODO: Save to backend
-  }
-
-  void _handleActivateListing(String id) {
-    setState(() {
-      final index = _listings.indexWhere((l) => l.id == id);
       if (index != -1) {
         _listings[index] = _listings[index].toggleStatus();
       }
