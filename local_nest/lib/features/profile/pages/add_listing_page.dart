@@ -6,7 +6,6 @@ import '../repositories/listing_repository.dart';
 import '../widgets/basic_info_section.dart';
 import '../widgets/location_section.dart';
 import '../widgets/pricing_capacity_section.dart';
-import '../widgets/amenities_section.dart';
 import '../widgets/photos_section.dart';
 
 /// AddListingPage - Main page for creating new property listings
@@ -68,8 +67,6 @@ class AddListingPage extends StatelessWidget {
                     const LocationSection(),
                     const SizedBox(height: 40),
                     const PricingCapacitySection(),
-                    const SizedBox(height: 40),
-                    const AmenitiesSection(),
                     const SizedBox(height: 40),
                     const PhotosSection(),
                     const SizedBox(height: 40),

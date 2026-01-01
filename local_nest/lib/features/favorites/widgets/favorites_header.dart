@@ -64,7 +64,7 @@ class FavoritesHeader extends StatelessWidget {
       'Favorites',
       style: AppTextStyles.heading1.copyWith(
         fontSize: 24,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: Colors.white,
       ),
     );

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'app/router/app_router.dart';
 import 'app/theme/app_theme.dart';
 import 'features/authentication/services/auth_service_provider.dart';
+import 'features/authentication/blocs/blocs.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,11 +33,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'LocalNest',
-      theme: AppTheme.lightTheme,
-      routerConfig: AppRouter.router,
+    return BlocProvider(
+      create: (context) => AuthBloc()..add(const CheckAuthStatus()),
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'LocalNest',
+        theme: AppTheme.lightTheme,
+        routerConfig: AppRouter.router,
+      ),
     );
   }
 }

@@ -60,7 +60,12 @@ class SignUpTermsToggled extends SignUpEvent {
 
 /// Event when form is submitted
 class SignUpSubmitted extends SignUpEvent {
-  const SignUpSubmitted();
+  final String userType; // 'renter' or 'landlord'
+
+  const SignUpSubmitted(this.userType);
+
+  @override
+  List<Object?> get props => [userType];
 }
 
 /// Event when signing up with Google

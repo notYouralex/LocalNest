@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
   void _handleSearch(String query) {
     // Navigate to search page with query parameter
     if (query.isNotEmpty) {
-      context.push('/home/search', extra: query);
+      context.go('/home/search', extra: query);
     }
   }
 
@@ -47,6 +47,7 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -102,11 +103,12 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text(
                       HomeConstants.availableListingsTitle,
-                      style: AppTextStyles.heading2.copyWith(
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        fontSize: 18,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    
                     _buildListingsSection(),
                   ],
                 ),

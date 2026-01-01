@@ -1,13 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/models.dart';
 import 'sign_up_auth.dart';
 
 /// Firebase implementation of SignUpAuthService
 class FirebaseSignUpAuthService implements SignUpAuthService {
   final FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
+  final GoogleSignIn? _googleSignIn;
   final FacebookAuth _facebookAuth;
 
   FirebaseSignUpAuthService({
@@ -15,7 +16,7 @@ class FirebaseSignUpAuthService implements SignUpAuthService {
     GoogleSignIn? googleSignIn,
     FacebookAuth? facebookAuth,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(),
+        _googleSignIn = kIsWeb ? null : (googleSignIn ?? GoogleSignIn()),
         _facebookAuth = facebookAuth ?? FacebookAuth.instance;
 
   @override
@@ -45,6 +46,12 @@ class FirebaseSignUpAuthService implements SignUpAuthService {
   @override
   Future<UserModel> signUpWithGoogle() async {
     try {
+      if (_googleSignIn == null) {
+        throw AuthException(
+          code: 'google-sign-up-unavailable',
+          message: 'Google sign-up is not available on this platform',
+        );
+      }
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw AuthException(
@@ -121,11 +128,14 @@ class FirebaseSignUpAuthService implements SignUpAuthService {
   @override
   Future<void> signOut() async {
     try {
-      await Future.wait([
+      final futures = [
         _firebaseAuth.signOut(),
-        _googleSignIn.signOut(),
         _facebookAuth.logOut(),
-      ]);
+      ];
+      if (_googleSignIn != null) {
+        futures.add(_googleSignIn.signOut());
+      }
+      await Future.wait(futures);
     } catch (e) {
       throw AuthException(
         code: 'sign-out-error',

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../app/theme/theme.dart';
+import '../blocs/blocs.dart';
 import '../widgets/widgets.dart';
 
 /// Login page UI matching the Figma design
@@ -9,23 +12,11 @@ class LoginPage extends StatefulWidget {
   
   /// Callback when user selects forgot password
   final VoidCallback? onForgotPasswordPressed;
-  
-  /// Callback when user signs in with email/password
-  final void Function(String email, String password, bool rememberMe)? onSignIn;
-  
-  /// Callback when user signs in with Google
-  final VoidCallback? onGoogleSignIn;
-  
-  /// Callback when user signs in with Facebook
-  final VoidCallback? onFacebookSignIn;
 
   const LoginPage({
     super.key,
     this.onSignUpPressed,
     this.onForgotPasswordPressed,
-    this.onSignIn,
-    this.onGoogleSignIn,
-    this.onFacebookSignIn,
   });
 
   @override
@@ -37,7 +28,6 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
-  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -48,174 +38,193 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleSignIn() {
     if (_formKey.currentState?.validate() ?? false) {
-      widget.onSignIn?.call(
-        _emailController.text.trim(),
-        _passwordController.text,
-        _rememberMe,
-      );
+      // Submit login with email and password
+      context.read<LoginBloc>().add(LoginSubmitted());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          // Header with gradient background
-          const AuthHeader(
-            title: 'Welcome Back',
-            subtitle: 'Sign in to continue',
-          ),
-          
-          // Form container
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              transform: Matrix4.translationValues(0, -24, 0),
-              decoration: const BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x40000000),
-                    blurRadius: 50,
-                    offset: Offset(0, -25),
+    return BlocListener<LoginBloc, LoginState>(
+      listener: (context, loginState) {
+        if (loginState.status == LoginStatus.success) {
+          // Login successful - reload AuthBloc to verify auth state
+          context.read<AuthBloc>().add(const CheckAuthStatus());
+          // Don't navigate yet - wait for AuthBloc to finish loading
+        } else if (loginState.status == LoginStatus.failure) {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(loginState.errorMessage ?? 'Login failed'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      },
+      child: BlocListener<AuthBloc, AuthState>(
+        listener: (context, authState) {
+          // Once AuthBloc confirms authentication, navigate to home
+          if (authState.isAuthenticated) {
+            context.goNamed('home');
+          }
+        },
+        child: Scaffold(
+        body: Column(
+          children: [
+            // Header with gradient background
+            const AuthHeader(
+              title: 'Welcome Back',
+              subtitle: 'Sign in to continue',
+            ),
+            
+            // Form container
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                transform: Matrix4.translationValues(0, -24, 0),
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Email field
-                      AuthTextField(
-                        label: 'Email Address',
-                        hintText: 'your.email@example.com',
-                        prefixIcon: Icons.email_outlined,
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        validator: _validateEmail,
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Password field
-                      PasswordTextField(
-                        label: 'Password',
-                        hintText: 'Enter your password',
-                        controller: _passwordController,
-                        textInputAction: TextInputAction.done,
-                        validator: _validatePassword,
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Remember me & Forgot password row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Remember me checkbox
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: Checkbox(
-                                  value: _rememberMe,
-                                  onChanged: (value) {
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x40000000),
+                      blurRadius: 50,
+                      offset: Offset(0, -25),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Email field
+                        AuthTextField(
+                          label: 'Email Address',
+                          hintText: 'your.email@example.com',
+                          prefixIcon: Icons.email_outlined,
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: _validateEmail,
+                          onChanged: (value) {
+                            context.read<LoginBloc>().add(LoginEmailChanged(value));
+                          },
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Password field
+                        PasswordTextField(
+                          label: 'Password',
+                          hintText: 'Enter your password',
+                          controller: _passwordController,
+                          textInputAction: TextInputAction.done,
+                          validator: _validatePassword,
+                          onChanged: (value) {
+                            context.read<LoginBloc>().add(LoginPasswordChanged(value));
+                          },
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Remember me & Forgot password row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Remember me checkbox
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: Checkbox(
+                                    value: _rememberMe,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _rememberMe = value ?? false;
+                                      });
+                                    },
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
                                     setState(() {
-                                      _rememberMe = value ?? false;
+                                      _rememberMe = !_rememberMe;
                                     });
                                   },
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  child: Text(
+                                    'Remember me',
+                                    style: AppTextStyles.bodyMedium,
+                                  ),
                                 ),
+                              ],
+                            ),
+                            
+                            // Forgot password button
+                            TextButton(
+                              onPressed: widget.onForgotPasswordPressed,
+                              child: Text(
+                                'Forgot Password?',
+                                style: AppTextStyles.link,
                               ),
-                              const SizedBox(width: 8),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _rememberMe = !_rememberMe;
-                                  });
-                                },
-                                child: Text(
-                                  'Remember me',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
+                            ),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Sign in button
+                        BlocBuilder<LoginBloc, LoginState>(
+                          builder: (context, state) {
+                            return AuthPrimaryButton(
+                              text: 'Sign In',
+                              onPressed: state.status == LoginStatus.loading ? null : _handleSignIn,
+                              isLoading: state.status == LoginStatus.loading,
+                            );
+                          },
+                        ),
+                        
+                        const SizedBox(height: 48),
+                        
+                        // Sign up link
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account?",
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
                               ),
-                            ],
-                          ),
-                          
-                          // Forgot password button
-                          TextButton(
-                            onPressed: widget.onForgotPasswordPressed,
-                            child: Text(
-                              'Forgot Password?',
-                              style: AppTextStyles.link,
                             ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Sign in button
-                      AuthPrimaryButton(
-                        text: 'Sign In',
-                        onPressed: _handleSignIn,
-                        isLoading: _isLoading,
-                      ),
-                      
-                      const SizedBox(height: 48),
-                      
-                      // Divider with text
-                      const AuthDivider(text: 'or continue with'),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Social login buttons
-                      SocialLoginRow(
-                        onGooglePressed: widget.onGoogleSignIn,
-                        onFacebookPressed: widget.onFacebookSignIn,
-                      ),
-                      
-                      const SizedBox(height: 48),
-                      
-                      // Sign up link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account?",
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
+                            TextButton(
+                              onPressed: widget.onSignUpPressed,
+                              child: Text(
+                                'Sign Up',
+                                style: AppTextStyles.linkLarge,
+                              ),
                             ),
-                          ),
-                          TextButton(
-                            onPressed: widget.onSignUpPressed,
-                            child: Text(
-                              'Sign Up',
-                              style: AppTextStyles.linkLarge,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
+        ),
+      );
   }
 
   String? _validateEmail(String? value) {

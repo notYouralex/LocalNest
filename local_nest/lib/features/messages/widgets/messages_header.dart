@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../app/theme/theme.dart';
 
 /// Header widget for Messages page
@@ -15,7 +16,7 @@ class MessagesHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+      padding: const EdgeInsets.fromLTRB(24, 48, 24, 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -37,6 +38,7 @@ class MessagesHeader extends StatelessWidget {
             'Messages',
             style: AppTextStyles.heading1.copyWith(
               color: AppColors.textWhite,
+              fontWeight: FontWeight.w600,
               fontSize: 24,
             ),
           ),
@@ -63,14 +65,6 @@ class MessagesHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16),
-            child: Icon(
-              Icons.search,
-              color: AppColors.textSecondary,
-              size: 20,
-            ),
-          ),
           Expanded(
             child: TextField(
               controller: searchController,
@@ -79,6 +73,14 @@ class MessagesHeader extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
               decoration: InputDecoration(
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: SvgPicture.asset(
+                    'assets/icons/search_notclicked.svg',
+                    fit: BoxFit.scaleDown,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 hintText: 'Search messages...',
                 hintStyle: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary,

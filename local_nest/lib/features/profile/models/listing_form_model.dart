@@ -17,12 +17,6 @@ class ListingFormData {
   int totalSlots;
   String genderPreference; // Any, Male Only, Female Only
 
-  // Amenities
-  bool wifiAvailable;
-  bool privateCR;
-  bool sharedCR;
-  bool petFriendly;
-
   // Photos
   List<String> photoUrls; // Firestore URLs or file paths
 
@@ -38,10 +32,6 @@ class ListingFormData {
     this.availableSlots = 0,
     this.totalSlots = 0,
     this.genderPreference = 'Any',
-    this.wifiAvailable = false,
-    this.privateCR = false,
-    this.sharedCR = false,
-    this.petFriendly = false,
     this.photoUrls = const [],
   });
 
@@ -58,10 +48,6 @@ class ListingFormData {
     int? availableSlots,
     int? totalSlots,
     String? genderPreference,
-    bool? wifiAvailable,
-    bool? privateCR,
-    bool? sharedCR,
-    bool? petFriendly,
     List<String>? photoUrls,
   }) {
     return ListingFormData(
@@ -76,10 +62,6 @@ class ListingFormData {
       availableSlots: availableSlots ?? this.availableSlots,
       totalSlots: totalSlots ?? this.totalSlots,
       genderPreference: genderPreference ?? this.genderPreference,
-      wifiAvailable: wifiAvailable ?? this.wifiAvailable,
-      privateCR: privateCR ?? this.privateCR,
-      sharedCR: sharedCR ?? this.sharedCR,
-      petFriendly: petFriendly ?? this.petFriendly,
       photoUrls: photoUrls ?? this.photoUrls,
     );
   }
@@ -94,7 +76,8 @@ class ListingFormData {
     if (availableSlots < 0) return 'Available slots cannot be negative';
     if (totalSlots <= 0) return 'Total slots must be greater than 0';
     if (availableSlots > totalSlots) return 'Available slots cannot exceed total slots';
-    if (photoUrls.isEmpty) return 'At least one photo is required';
+    if (photoUrls.length < 2) return 'At least 2 photos are required';
+    if (photoUrls.length > 3) return 'Maximum 3 photos allowed';
     return null;
   }
 
@@ -112,12 +95,6 @@ class ListingFormData {
       'availableSlots': availableSlots,
       'totalSlots': totalSlots,
       'genderPreference': genderPreference,
-      'amenities': {
-        'wifiAvailable': wifiAvailable,
-        'privateCR': privateCR,
-        'sharedCR': sharedCR,
-        'petFriendly': petFriendly,
-      },
       'photoUrls': photoUrls,
       'createdAt': DateTime.now().toIso8601String(),
     };

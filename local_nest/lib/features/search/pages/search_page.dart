@@ -96,6 +96,7 @@ class _SearchPageState extends State<SearchPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(SearchConstants.filterModalBorderRadius),
@@ -169,7 +170,9 @@ class _SearchPageState extends State<SearchPage> {
             priceRange: priceRange,
             onApplyFilters: (filter) {
               final currentQuery = _searchController.text;
-              _searchBloc.add(ApplyFiltersEvent(filter, currentQuery: currentQuery));
+              _searchBloc.add(
+                ApplyFiltersEvent(filter, currentQuery: currentQuery),
+              );
               Navigator.pop(context);
             },
           );
@@ -196,7 +199,13 @@ class _SearchPageState extends State<SearchPage> {
               scrolledUnderElevation: 0,
               toolbarHeight: SearchConstants.headerHeight,
               flexibleSpace: Container(
-                color: AppColors.background,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: AppColors.primaryGradient,
+                  ),
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: SearchConstants.horizontalPadding,
                 ),
@@ -210,8 +219,9 @@ class _SearchPageState extends State<SearchPage> {
                         child: Text(
                           'Search Results',
                           style: AppTextStyles.heading2.copyWith(
-                            color: AppColors.textPrimary,
-                            fontSize: 20,
+                            color: AppColors.textWhite,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -228,7 +238,8 @@ class _SearchPageState extends State<SearchPage> {
                               onChanged: _performSearch,
                               onFilterTap: _handleFilterTap,
                               onClearTap: _clearSearch,
-                              showClearButton: _searchController.text.isNotEmpty,
+                              showClearButton:
+                                  _searchController.text.isNotEmpty,
                               isFilterActive: isFilterActive,
                             );
                           },
@@ -250,7 +261,9 @@ class _SearchPageState extends State<SearchPage> {
                 child: BlocBuilder<SearchBloc, SearchState>(
                   builder: (context, state) {
                     if (state is SearchLoadingState) {
-                      return const LoadingStateWidget(message: 'Searching listings...');
+                      return const LoadingStateWidget(
+                        message: 'Searching listings...',
+                      );
                     }
 
                     if (state is SearchErrorState) {
@@ -270,9 +283,7 @@ class _SearchPageState extends State<SearchPage> {
                         );
                       }
 
-                      return PopularListingsView(
-                        listings: state.listings,
-                      );
+                      return PopularListingsView(listings: state.listings);
                     }
 
                     if (state is SearchSuccessState) {

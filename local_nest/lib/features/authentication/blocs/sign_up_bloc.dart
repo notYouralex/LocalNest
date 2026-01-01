@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/services.dart';
+import '../../profile/repositories/firestore_user_repository.dart';
 
 part 'sign_up_event.dart';
 part 'sign_up_state.dart';
@@ -8,9 +10,13 @@ part 'sign_up_state.dart';
 /// Sign Up Bloc - handles sign up state management
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final SignUpAuthService _authService;
+  final FirestoreUserRepository _userRepository;
 
-  SignUpBloc({required SignUpAuthService authService})
-      : _authService = authService,
+  SignUpBloc({
+    required SignUpAuthService authService,
+    FirestoreUserRepository? userRepository,
+  })  : _authService = authService,
+        _userRepository = userRepository ?? FirestoreUserRepository(),
         super(const SignUpState()) {
     on<SignUpNameChanged>(_onNameChanged);
     on<SignUpEmailChanged>(_onEmailChanged);
@@ -52,11 +58,27 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     emit(state.copyWith(status: SignUpStatus.loading));
 
     try {
+      // Create Firebase Auth user
       await _authService.signUpWithEmail(
         state.name,
         state.email,
         state.password,
       );
+
+      // Get the newly created user
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('Failed to get user ID');
+      }
+
+      // Create user profile in Firestore
+      await _userRepository.createUserProfile(
+        userId: userId,
+        email: state.email,
+        userType: event.userType,
+        displayName: state.name,
+      );
+
       emit(state.copyWith(status: SignUpStatus.success));
     } catch (e) {
       emit(state.copyWith(

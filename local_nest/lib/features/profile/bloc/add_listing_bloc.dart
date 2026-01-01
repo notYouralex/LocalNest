@@ -83,15 +83,6 @@ class GenderPreferenceChanged extends AddListingEvent {
   List<Object?> get props => [preference];
 }
 
-class AmenityToggled extends AddListingEvent {
-  final String amenity;
-  final bool value;
-  const AmenityToggled(this.amenity, this.value);
-
-  @override
-  List<Object?> get props => [amenity, value];
-}
-
 class PhotosAdded extends AddListingEvent {
   final List<String> photoPaths;
   const PhotosAdded(this.photoPaths);
@@ -106,6 +97,15 @@ class PhotoRemoved extends AddListingEvent {
 
   @override
   List<Object?> get props => [index];
+}
+
+class LocationChanged extends AddListingEvent {
+  final double latitude;
+  final double longitude;
+  const LocationChanged(this.latitude, this.longitude);
+
+  @override
+  List<Object?> get props => [latitude, longitude];
 }
 
 class ListingSubmitted extends AddListingEvent {
@@ -175,9 +175,9 @@ class AddListingBloc extends Bloc<AddListingEvent, AddListingState> {
     on<AvailableSlotsChanged>(_onAvailableSlotsChanged);
     on<TotalSlotsChanged>(_onTotalSlotsChanged);
     on<GenderPreferenceChanged>(_onGenderPreferenceChanged);
-    on<AmenityToggled>(_onAmenityToggled);
     on<PhotosAdded>(_onPhotosAdded);
     on<PhotoRemoved>(_onPhotoRemoved);
+    on<LocationChanged>(_onLocationChanged);
     on<ListingSubmitted>(_onListingSubmitted);
   }
 
@@ -258,27 +258,6 @@ class AddListingBloc extends Bloc<AddListingEvent, AddListingState> {
     emit(AddListingFormUpdated(_currentFormData));
   }
 
-  Future<void> _onAmenityToggled(
-    AmenityToggled event,
-    Emitter<AddListingState> emit,
-  ) async {
-    switch (event.amenity) {
-      case 'wifi':
-        _currentFormData = _currentFormData.copyWith(wifiAvailable: event.value);
-        break;
-      case 'privateCR':
-        _currentFormData = _currentFormData.copyWith(privateCR: event.value);
-        break;
-      case 'sharedCR':
-        _currentFormData = _currentFormData.copyWith(sharedCR: event.value);
-        break;
-      case 'petFriendly':
-        _currentFormData = _currentFormData.copyWith(petFriendly: event.value);
-        break;
-    }
-    emit(AddListingFormUpdated(_currentFormData));
-  }
-
   Future<void> _onPhotosAdded(
     PhotosAdded event,
     Emitter<AddListingState> emit,
@@ -295,6 +274,17 @@ class AddListingBloc extends Bloc<AddListingEvent, AddListingState> {
     final updatedPhotos = List<String>.from(_currentFormData.photoUrls);
     updatedPhotos.removeAt(event.index);
     _currentFormData = _currentFormData.copyWith(photoUrls: updatedPhotos);
+    emit(AddListingFormUpdated(_currentFormData));
+  }
+
+  Future<void> _onLocationChanged(
+    LocationChanged event,
+    Emitter<AddListingState> emit,
+  ) async {
+    _currentFormData = _currentFormData.copyWith(
+      latitude: event.latitude,
+      longitude: event.longitude,
+    );
     emit(AddListingFormUpdated(_currentFormData));
   }
 

@@ -5,7 +5,7 @@ class FavoritesConstants {
   // Spacing
   static const double contentPadding = 16;
   static const double gridSpacing = 16;
-  static const double headerVerticalPadding = 48;
+  static const double headerVerticalPadding = 20;
   static const double headerHorizontalPadding = 24;
 
   // Grid
@@ -13,7 +13,7 @@ class FavoritesConstants {
   static const int gridCrossAxisCount = 2;
 
   // Header
-  static const double headerExpandedHeight = 140;
+  static const double headerExpandedHeight = 100;
   static const double headerIconSize = 48;
   static const double headerIconContainerSize = 96;
   static const double headerIconContainerBorderRadius = 12;

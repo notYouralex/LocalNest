@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/core.dart';
 import '../../features/authentication/authentication.dart';
-import '../../features/authentication/services/auth_service_provider.dart';
 import '../../features/listing_detail/listing_detail.dart';
 import '../../features/messages/messages.dart';
 import '../../features/profile/pages/manage_listings_page.dart';
@@ -28,12 +27,14 @@ class _AppIntroNavigationService implements IntroNavigationService {
 
   @override
   void onRenterSelected() {
-    context.pushNamed('login');
+    // Pass userType only to signup, not to login
+    context.pushNamed('login', extra: 'renter');
   }
 
   @override
   void onLandlordSelected() {
-    context.pushNamed('login');
+    // Pass userType only to signup, not to login
+    context.pushNamed('login', extra: 'landlord');
   }
 }
 
@@ -83,21 +84,31 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.intro,
     debugLogDiagnostics: true,
-    // Auth guard: redirect to login if not authenticated
+    // Auth guard: redirect based on AuthBloc state
     redirect: (context, state) {
-      final isLoggedIn = AuthServiceProvider.isAuthenticated();
-      final isGoingToAuthRoute = state.matchedLocation.contains('/login') ||
-          state.matchedLocation.contains('/sign-up') ||
-          state.matchedLocation.contains('/forgot-password') ||
-          state.matchedLocation == '/';
-
-      // If not logged in and trying to access protected routes, go to login
-      if (!isLoggedIn && !isGoingToAuthRoute) {
-        return '/login';
+      // Get AuthBloc to check authentication status
+      final authBloc = context.read<AuthBloc>();
+      final authState = authBloc.state;
+      
+      // Don't redirect while loading
+      if (authState.isLoading) {
+        return null;
       }
 
-      // If logged in and trying to access auth routes, go to home
-      if (isLoggedIn && isGoingToAuthRoute) {
+      final isAuthenticated = authState.isAuthenticated;
+      final isGoingToIntro = state.matchedLocation == '/';
+      final isGoingToLoginSignup = state.matchedLocation.contains('/login') ||
+          state.matchedLocation.contains('/sign-up') ||
+          state.matchedLocation.contains('/forgot-password');
+
+      // If not authenticated and trying to access protected routes, go to intro
+      if (!isAuthenticated && !isGoingToIntro && !isGoingToLoginSignup) {
+        return '/';
+      }
+
+      // If authenticated and trying to access INTRO page specifically, go to home
+      // Allow authenticated users to still access login/signup for edge cases
+      if (isAuthenticated && isGoingToIntro) {
         return '/home';
       }
 
@@ -117,40 +128,37 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.login,
         name: 'login',
-        builder: (context, state) => LoginPage(
-          onSignUpPressed: () => context.pushNamed('signUp'),
-          onForgotPasswordPressed: () => context.pushNamed('forgotPassword'),
-          onSignIn: (email, password, rememberMe) {
-            // TODO: Implement sign in logic with Bloc
-            debugPrint('Sign in: $email, remember: $rememberMe');
-            context.goNamed('home');
-          },
-          onGoogleSignIn: () {
-            // TODO: Implement Google sign in
-            debugPrint('Google sign in');
-            context.goNamed('home');
-          },
-          onFacebookSignIn: () {
-            // TODO: Implement Facebook sign in
-            debugPrint('Facebook sign in');
-            context.goNamed('home');
-          },
-        ),
+        builder: (context, state) {
+          final userType = state.extra as String? ?? 'renter';
+          return BlocProvider(
+            create: (context) => LoginBloc(
+              authService: AuthServiceProvider.getLoginAuthService(),
+            ),
+            child: LoginPage(
+              onSignUpPressed: () => context.pushNamed('signUp', extra: userType),
+              onForgotPasswordPressed: () => context.pushNamed('forgotPassword'),
+            ),
+          );
+        },
       ),
 
       // Sign Up screen
       GoRoute(
         path: AppRoutes.signUp,
         name: 'signUp',
-        builder: (context, state) => BlocProvider(
-          create: (context) => SignUpBloc(
-            authService: AuthServiceProvider.getSignUpAuthService(),
-          ),
-          child: SignUpPage(
-            onBackPressed: () => context.pop(),
-            onSignInPressed: () => context.pop(),
-          ),
-        ),
+        builder: (context, state) {
+          final userType = state.extra as String? ?? 'renter';
+          return BlocProvider(
+            create: (context) => SignUpBloc(
+              authService: AuthServiceProvider.getSignUpAuthService(),
+            ),
+            child: SignUpPage(
+              userType: userType,
+              onBackPressed: () => context.pop(),
+              onSignInPressed: () => context.pop(),
+            ),
+          );
+        },
       ),
 
       // Forgot Password screen

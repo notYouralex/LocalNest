@@ -106,35 +106,29 @@ class NotificationSettings {
 class RenterStats {
   final int favorites;
   final int messages;
-  final int alerts;
 
   RenterStats({
     this.favorites = 0,
     this.messages = 0,
-    this.alerts = 0,
   });
 
   RenterStats copyWith({
     int? favorites,
     int? messages,
-    int? alerts,
   }) {
     return RenterStats(
       favorites: favorites ?? this.favorites,
       messages: messages ?? this.messages,
-      alerts: alerts ?? this.alerts,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'favorites': favorites,
     'messages': messages,
-    'alerts': alerts,
   };
 
   factory RenterStats.fromJson(Map<String, dynamic> json) => RenterStats(
     favorites: json['favorites'] as int? ?? 0,
     messages: json['messages'] as int? ?? 0,
-    alerts: json['alerts'] as int? ?? 0,
   );
 }

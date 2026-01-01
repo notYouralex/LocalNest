@@ -1,11 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/services.dart';
+import '../../profile/repositories/firestore_user_repository.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
 
-/// Login Bloc - handles login state management
+/// Login Bloc - handles login state management and Firestore profile validation
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(const LoginState()) {
+  final LoginAuthService _authService;
+  final FirestoreUserRepository _userRepository;
+
+  LoginBloc({
+    required LoginAuthService authService,
+    FirestoreUserRepository? userRepository,
+  })  : _authService = authService,
+        _userRepository = userRepository ?? FirestoreUserRepository(),
+        super(const LoginState()) {
     on<LoginEmailChanged>(_onEmailChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
     on<LoginSubmitted>(_onSubmitted);
@@ -23,11 +34,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   Future<void> _onSubmitted(LoginSubmitted event, Emitter<LoginState> emit) async {
     emit(state.copyWith(status: LoginStatus.loading));
-    
+
     try {
-      // TODO: Implement actual login logic
-      await Future.delayed(const Duration(seconds: 2));
-      emit(state.copyWith(status: LoginStatus.success));
+      // Sign in with Firebase Auth
+      await _authService.signInWithEmail(state.email, state.password);
+
+      // Get the authenticated user
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('Failed to get user ID after login');
+      }
+
+      // Fetch user profile from Firestore
+      final userProfile = await _userRepository.getUserProfile(userId);
+      if (userProfile == null) {
+        throw Exception('User profile not found. Please complete registration.');
+      }
+
+      // Emit success with the real userType from Firestore (not from intro page)
+      emit(state.copyWith(
+        status: LoginStatus.success,
+        userType: userProfile.userType,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LoginStatus.failure,

@@ -9,6 +9,9 @@ import '../widgets/widgets.dart';
 
 /// Sign Up page UI matching the Figma design with app theme
 class SignUpPage extends StatefulWidget {
+  /// User type selected in intro page (renter or landlord)
+  final String userType;
+
   /// Callback when user selects sign in
   final VoidCallback? onSignInPressed;
 
@@ -17,6 +20,7 @@ class SignUpPage extends StatefulWidget {
 
   const SignUpPage({
     super.key,
+    required this.userType,
     this.onSignInPressed,
     this.onBackPressed,
   });
@@ -56,7 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
-      context.read<SignUpBloc>().add(const SignUpSubmitted());
+      context.read<SignUpBloc>().add(SignUpSubmitted(widget.userType));
     }
   }
 

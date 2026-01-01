@@ -9,6 +9,8 @@ import '../../features/search/pages/search_page.dart';
 import '../../features/favorites/favorites.dart';
 import '../../features/messages/messages.dart';
 import '../../features/profile/profile.dart';
+import '../../features/profile/bloc/user_bloc.dart';
+import '../../features/profile/repositories/firestore_user_repository.dart';
 
 /// Main navigation shell with bottom navigation bar
 class MainNavigationShell extends StatefulWidget {
@@ -43,7 +45,12 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       SearchPage(initialQuery: widget.searchQuery),
       FavoritesPage(),
       const MessagesPage(),
-      const ProfilePage(),
+      BlocProvider(
+        create: (context) => UserBloc(
+          userRepository: FirestoreUserRepository(),
+        ),
+        child: const ProfilePage(),
+      ),
     ];
   }
 

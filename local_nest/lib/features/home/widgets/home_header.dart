@@ -80,7 +80,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                       'LocalNest',
                       style: AppTextStyles.heading1.copyWith(
                         fontSize: 24,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),

@@ -17,12 +17,24 @@ class _PhotosSectionState extends State<PhotosSection> {
   final ImagePicker _imagePicker = ImagePicker();
 
   Future<void> _pickImages() async {
+    if (_selectedImages.length >= 3) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Maximum 3 photos allowed')),
+        );
+      }
+      return;
+    }
+    
     try {
+      final int remainingSlots = 3 - _selectedImages.length;
       final List<XFile> pickedFiles = await _imagePicker.pickMultiImage(
         imageQuality: 85,
       );
       if (pickedFiles.isNotEmpty) {
-        final newPaths = pickedFiles.map((f) => f.path).toList();
+        // Only take up to remaining slots
+        final filesToAdd = pickedFiles.take(remainingSlots).toList();
+        final newPaths = filesToAdd.map((f) => f.path).toList();
         setState(() {
           _selectedImages.addAll(newPaths);
         });
@@ -85,7 +97,7 @@ class _PhotosSectionState extends State<PhotosSection> {
             const SizedBox(height: 16),
             // Description
             Text(
-              'Add beautiful photos of your property to attract renters',
+              'Add 2-3 photos of your property to attract renters',
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: const Color(0xFF64748b),
@@ -120,10 +132,10 @@ class _PhotosSectionState extends State<PhotosSection> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: _selectedImages.length < 10 ? _pickImages : null,
+                  onPressed: _selectedImages.length < 3 ? _pickImages : null,
                   icon: const Icon(Icons.add_photo_alternate),
                   label: Text(
-                    'Add More Photos (${_selectedImages.length}/10)',
+                    'Add More Photos (${_selectedImages.length}/3)',
                     style: GoogleFonts.poppins(fontSize: 14),
                   ),
                   style: OutlinedButton.styleFrom(

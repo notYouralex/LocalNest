@@ -25,7 +25,7 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+      padding: const EdgeInsets.fromLTRB(24, 48, 24, 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -51,7 +51,8 @@ class ProfileHeader extends StatelessWidget {
                 ProfileConstants.profileTitle,
                 style: AppTextStyles.heading1.copyWith(
                   color: AppColors.textWhite,
-                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 24,
                 ),
               ),
               Ink(

@@ -54,10 +54,8 @@ class ProfileConstants {
   // Stats
   static const String favoritesLabel = 'Favorites';
   static const String messagesLabel = 'Messages';
-  static const String alertsLabel = 'Alerts';
   static const int defaultFavorites = 5;
   static const int defaultMessages = 12;
-  static const int defaultAlerts = 3;
 
   // Dialog messages
   static const String logoutDialogTitle = 'Logout';
