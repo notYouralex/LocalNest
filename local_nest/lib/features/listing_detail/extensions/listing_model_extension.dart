@@ -11,8 +11,6 @@ extension ListingModelToDetailExtension on ListingModel {
       address: location,
       barangay: 'Barangay Sampaloc', // TODO: Add to ListingModel
       price: price.toDouble(),
-      rating: rating,
-      reviewCount: reviewCount,
       slotsAvailable: 2, // TODO: Add to ListingModel
       images: [
         imageUrl,

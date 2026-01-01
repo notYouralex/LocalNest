@@ -227,54 +227,16 @@ class ListingCard extends StatelessWidget {
             height: 1,
           ),
           const SizedBox(height: 10),
-          // Rating and Amenities Row
+          // Amenities Row
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Rating
-              Row(
-                children: [
-                  const Icon(
-                    Icons.star_rounded,
-                    size: 16,
-                    color: AppColors.warning,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${listing.rating}',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '(${listing.reviewCount})',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              // Amenities - Green badges
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: listing.amenities
-                        .take(2)
-                        .map((amenity) => Padding(
-                              padding: const EdgeInsets.only(left: 6),
-                              child: _buildAmenityBadge(amenity),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ),
-            ],
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: listing.amenities
+                .take(3)
+                .map((amenity) => Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: _buildAmenityBadge(amenity),
+                    ))
+                .toList(),
           ),
         ],
       ),
@@ -525,54 +487,16 @@ class ListingCardWithBloc extends StatelessWidget {
             height: 1,
           ),
           const SizedBox(height: 6),
-          // Rating and Amenities Row
+          // Amenities Row
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Rating
-              Row(
-                children: [
-                  const Icon(
-                    Icons.star_rounded,
-                    size: 16,
-                    color: AppColors.warning,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${listing.rating}',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '(${listing.reviewCount})',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              // Amenities - Green badges
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: listing.amenities
-                        .take(2)
-                        .map((amenity) => Padding(
-                              padding: const EdgeInsets.only(left: 6),
-                              child: _buildAmenityBadge(amenity),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ),
-            ],
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: listing.amenities
+                .take(3)
+                .map((amenity) => Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: _buildAmenityBadge(amenity),
+                    ))
+                .toList(),
           ),
         ],
       ),

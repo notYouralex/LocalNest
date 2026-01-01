@@ -37,13 +37,13 @@ class _SearchPageState extends State<SearchPage> {
     // Initialize BLoC
     _searchBloc = SearchBloc(repository: _repository);
 
-    // Load popular listings initially, or search with initial query
+    // Load all listings initially, or search with initial query
     Future.microtask(() {
       if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
         _searchController.text = widget.initialQuery!;
         _performSearch(widget.initialQuery!);
       } else {
-        _searchBloc.add(const GetPopularListingsEvent());
+        _searchBloc.add(const SearchQueryEvent(''));
       }
     });
   }
@@ -75,11 +75,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _performSearch(String query) {
-    if (query.isEmpty) {
-      _searchBloc.add(const GetPopularListingsEvent());
-    } else {
-      _searchBloc.add(SearchQueryEvent(query));
-    }
+    _searchBloc.add(SearchQueryEvent(query));
   }
 
   void _clearSearch() {
@@ -270,26 +266,15 @@ class _SearchPageState extends State<SearchPage> {
                       return ErrorStateWidget(
                         message: state.message,
                         onRetry: () {
-                          _searchBloc.add(const GetPopularListingsEvent());
+                          _searchBloc.add(const SearchQueryEvent(''));
                         },
                       );
-                    }
-
-                    if (state is PopularListingsState) {
-                      if (state.listings.isEmpty) {
-                        return SearchEmptyState(
-                          icon: Icons.search,
-                          message: SearchConstants.noPopularListingsText,
-                        );
-                      }
-
-                      return PopularListingsView(listings: state.listings);
                     }
 
                     if (state is SearchSuccessState) {
                       if (state.results.isEmpty) {
                         return SearchEmptyState(
-                          icon: Icons.search_off,
+                          icon: Icons.search,
                           message: SearchConstants.noSearchResultsText,
                         );
                       }

@@ -4,8 +4,6 @@ class ListingDetail {
   final String address;
   final String barangay;
   final double price;
-  final double rating;
-  final int reviewCount;
   final int slotsAvailable;
   final List<String> images;
   final String description;
@@ -22,8 +20,6 @@ class ListingDetail {
     required this.address,
     required this.barangay,
     required this.price,
-    required this.rating,
-    required this.reviewCount,
     required this.slotsAvailable,
     required this.images,
     required this.description,
@@ -42,8 +38,6 @@ class ListingDetail {
       address: json['address'] ?? '',
       barangay: json['barangay'] ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-      reviewCount: json['reviewCount'] ?? 0,
       slotsAvailable: json['slotsAvailable'] ?? 0,
       images: List<String>.from(json['images'] ?? []),
       description: json['description'] ?? '',

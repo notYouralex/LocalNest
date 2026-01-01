@@ -6,8 +6,6 @@ class ListingDetailHeader extends StatelessWidget {
   final String title;
   final String address;
   final double price;
-  final double rating;
-  final int reviewCount;
   final int slotsAvailable;
   final List<String> tags;
 
@@ -16,8 +14,6 @@ class ListingDetailHeader extends StatelessWidget {
     required this.title,
     required this.address,
     required this.price,
-    required this.rating,
-    required this.reviewCount,
     required this.slotsAvailable,
     required this.tags,
   }) : super(key: key);
@@ -78,35 +74,9 @@ class ListingDetailHeader extends StatelessWidget {
         ),
         const SizedBox(height: itemSpacing),
 
-        // Rating, Reviews, and Availability
+        // Availability
         Row(
           children: [
-            // Rating
-            Icon(
-              Icons.star,
-              size: iconSize,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              rating.toString(),
-              style: AppTextStyles.bodyLarge,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              '($reviewCount reviews)',
-              style: AppTextStyles.bodySmall,
-            ),
-            const SizedBox(width: 12),
-            Container(
-              height: 1,
-              width: 1,
-              decoration: BoxDecoration(
-                color: AppColors.border,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 12),
             Text(
               '$slotsAvailable slots available',
               style: AppTextStyles.bodyLarge.copyWith(

@@ -9,20 +9,6 @@ abstract class SearchEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Event to get popular listings
-class GetPopularListingsEvent extends SearchEvent {
-  final int limit;
-  final int offset;
-
-  const GetPopularListingsEvent({
-    this.limit = 10,
-    this.offset = 0,
-  });
-
-  @override
-  List<Object?> get props => [limit, offset];
-}
-
 /// Event to search listings by query
 class SearchQueryEvent extends SearchEvent {
   final String query;

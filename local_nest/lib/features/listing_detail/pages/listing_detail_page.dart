@@ -67,8 +67,6 @@ class _ListingDetailPageState extends State<ListingDetailPage>
                     title: widget.listing.title,
                     address: widget.listing.address,
                     price: widget.listing.price,
-                    rating: widget.listing.rating,
-                    reviewCount: widget.listing.reviewCount,
                     slotsAvailable: widget.listing.slotsAvailable,
                     tags: widget.listing.tags,
                   ),

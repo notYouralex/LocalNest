@@ -78,22 +78,6 @@ class SearchSuggestionsState extends SearchState {
   List<Object?> get props => [suggestions];
 }
 
-/// State for popular listings
-class PopularListingsState extends SearchState {
-  final List<ListingModel> listings;
-  final int currentOffset;
-  final bool hasMoreResults;
-
-  const PopularListingsState({
-    required this.listings,
-    this.currentOffset = 0,
-    this.hasMoreResults = false,
-  });
-
-  @override
-  List<Object?> get props => [listings, currentOffset, hasMoreResults];
-}
-
 /// State for filters being applied
 class FiltersAppliedState extends SearchState {
   final SearchFilter filter;

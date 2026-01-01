@@ -4,12 +4,6 @@ import '../../home/models/listing_model.dart';
 /// Abstract repository interface for search operations
 /// Following Dependency Inversion Principle (DIP)
 abstract class SearchRepository {
-  /// Get popular listings
-  Future<List<ListingModel>> getPopularListings({
-    int limit = 10,
-    int offset = 0,
-  });
-
   /// Search listings by query
   Future<List<ListingModel>> searchListings(
     String query, {

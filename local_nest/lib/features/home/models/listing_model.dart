@@ -5,8 +5,6 @@ class ListingModel {
   final String location;
   final double price;
   final String imageUrl;
-  final double rating;
-  final int reviewCount;
   final List<String> amenities;
   final bool isAvailable;
   final bool isFavorite;
@@ -17,8 +15,6 @@ class ListingModel {
     required this.location,
     required this.price,
     required this.imageUrl,
-    required this.rating,
-    required this.reviewCount,
     required this.amenities,
     this.isAvailable = true,
     this.isFavorite = false,
@@ -31,8 +27,6 @@ class ListingModel {
     String? location,
     double? price,
     String? imageUrl,
-    double? rating,
-    int? reviewCount,
     List<String>? amenities,
     bool? isAvailable,
     bool? isFavorite,
@@ -43,8 +37,6 @@ class ListingModel {
       location: location ?? this.location,
       price: price ?? this.price,
       imageUrl: imageUrl ?? this.imageUrl,
-      rating: rating ?? this.rating,
-      reviewCount: reviewCount ?? this.reviewCount,
       amenities: amenities ?? this.amenities,
       isAvailable: isAvailable ?? this.isAvailable,
       isFavorite: isFavorite ?? this.isFavorite,
@@ -61,8 +53,6 @@ class ListingModel {
           location == other.location &&
           price == other.price &&
           imageUrl == other.imageUrl &&
-          rating == other.rating &&
-          reviewCount == other.reviewCount &&
           amenities == other.amenities &&
           isAvailable == other.isAvailable &&
           isFavorite == other.isFavorite;
@@ -74,8 +64,6 @@ class ListingModel {
       location.hashCode ^
       price.hashCode ^
       imageUrl.hashCode ^
-      rating.hashCode ^
-      reviewCount.hashCode ^
       amenities.hashCode ^
       isAvailable.hashCode ^
       isFavorite.hashCode;

@@ -12,7 +12,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
   SearchBloc({required this.repository}) : super(const SearchInitialState()) {
     // Register event handlers
-    on<GetPopularListingsEvent>(_onGetPopularListings);
     on<SearchQueryEvent>(_onSearchQuery);
     on<SearchWithFiltersEvent>(_onSearchWithFilters);
     on<LoadMoreSearchResultsEvent>(_onLoadMoreResults);
@@ -20,29 +19,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     on<ClearSearchEvent>(_onClearSearch);
     on<ApplyFiltersEvent>(_onApplyFilters);
     on<ClearFiltersEvent>(_onClearFilters);
-  }
-
-  /// Handle getting popular listings
-  Future<void> _onGetPopularListings(
-    GetPopularListingsEvent event,
-    Emitter<SearchState> emit,
-  ) async {
-    emit(const SearchLoadingState());
-
-    try {
-      final results = await repository.getPopularListings(
-        limit: event.limit,
-        offset: event.offset,
-      );
-
-      emit(PopularListingsState(
-        listings: results,
-        currentOffset: event.offset,
-        hasMoreResults: results.length == event.limit,
-      ));
-    } catch (e) {
-      emit(SearchErrorState('Failed to load popular listings: ${e.toString()}'));
-    }
   }
 
   /// Handle search by query
