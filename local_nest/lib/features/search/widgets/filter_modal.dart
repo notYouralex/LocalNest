@@ -37,11 +37,11 @@ class _FilterModalState extends State<FilterModal> {
       maxPrice: filterData['maxPrice'],
       roomType: filterData['roomType'],
       capacity: filterData['capacity'],
+      genderPreference: filterData['genderPreference'],
     );
 
     widget.onApplyFilters(_filter);
-    // Pop the modal after applying filters
-    Navigator.pop(context);
+    // Note: Navigation is handled by the parent (search_page.dart)
   }
 
   @override
@@ -51,6 +51,7 @@ class _FilterModalState extends State<FilterModal> {
       maxPrice: _filter.maxPrice,
       roomType: _filter.roomType,
       capacity: _filter.capacity,
+      genderPreference: _filter.genderPreference,
       onApply: _handleApplyFilters,
     );
   }

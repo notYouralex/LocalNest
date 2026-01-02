@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme/theme.dart';
 
 /// Reusable advanced filter modal for search and home features
-/// Filters by: price range, room type, capacity, and amenities
+/// Filters by: price range, room type, and capacity
 class AdvancedFilterModal extends StatefulWidget {
   final double? minPrice;
   final double? maxPrice;
-  final String roomType; // 'all', 'solo', 'shared'
+  final String roomType; // 'all', 'solo', 'shared', 'studio', 'apartment'
   final String capacity; // 'any', '1+', '2+', '4+'
-  final List<String> selectedAmenities;
-  final List<String> availableAmenities;
+  final String genderPreference; // 'any', 'male', 'female'
   final Function(Map<String, dynamic>) onApply;
 
   const AdvancedFilterModal({
@@ -17,8 +17,7 @@ class AdvancedFilterModal extends StatefulWidget {
     this.maxPrice,
     this.roomType = 'all',
     this.capacity = 'any',
-    this.selectedAmenities = const [],
-    this.availableAmenities = const ['WiFi', 'Air Conditioning'],
+    this.genderPreference = 'any',
     required this.onApply,
   });
 
@@ -33,7 +32,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
   String? _maxPriceError;
   late String _roomType;
   late String _capacity;
-  late List<String> _selectedAmenities;
+  late String _genderPreference;
 
   // ===== DESIGN CONSTANTS =====
 
@@ -49,33 +48,33 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
   static const double _inputBorderRadius = 8;
   static const double _modalBorderRadius = 16;
 
-  // Colors
-  static const Color _selectedColorStart = Color(0xFF06b6d4); // Cyan
-  static const Color _selectedColorEnd = Color(0xFF0891b2); // Darker cyan
-  static const Color _unselectedColor = Colors.white;
-  static const Color _unselectedBorder = Color(0xFFe2e8f0);
-  static const Color _headerDarkStart = Color(0xFF0f172a);
-  static const Color _headerDarkEnd = Color(0xFF1e293b);
-  static const Color _textPrimary = Color(0xFF0f172a);
-  static const Color _textSecondary = Color(0xFF64748b);
-  static const Color _textTertiary = Color(0xFF94a3b8);
-  static const Color _lightBg = Color(0xFFf8fafc);
-  static const Color _borderColor = Color(0xFFe2e8f0);
+  // Colors - using app theme
+  static final Color _selectedColorStart = AppColors.primary;
+  static final Color _selectedColorEnd = AppColors.primary;
+  static const Color _unselectedColor = AppColors.surface;
+  static final Color _unselectedBorder = AppColors.border;
+  static final Color _headerDarkStart = AppColors.primary;
+  static final Color _headerDarkEnd = AppColors.primary;
+  static final Color _textPrimary = AppColors.textPrimary;
+  static final Color _textSecondary = AppColors.textSecondary;
+  static final Color _textTertiary = AppColors.textSecondary;
+  static const Color _lightBg = AppColors.background;
+  static final Color _borderColor = AppColors.border;
 
   // Text styles
-  static const TextStyle _sectionTitleStyle = TextStyle(
+  static final TextStyle _sectionTitleStyle = TextStyle(
     color: _textPrimary,
     fontSize: 14,
     fontWeight: FontWeight.w600,
   );
 
-  static const TextStyle _labelStyle = TextStyle(
+  static final TextStyle _labelStyle = TextStyle(
     color: _textSecondary,
     fontSize: 12,
     fontWeight: FontWeight.w500,
   );
 
-  static const TextStyle _buttonTextStyle = TextStyle(
+  static final TextStyle _buttonTextStyle = TextStyle(
     color: _textPrimary,
     fontSize: 14,
     fontWeight: FontWeight.w600,
@@ -100,7 +99,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
     );
     _roomType = widget.roomType;
     _capacity = widget.capacity;
-    _selectedAmenities = List.from(widget.selectedAmenities);
+    _genderPreference = widget.genderPreference;
   }
 
   @override
@@ -196,7 +195,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
   Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [_headerDarkStart, _headerDarkEnd],
@@ -251,9 +250,9 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
             const SizedBox(height: _sectionSpacing),
             _buildCapacitySection(),
             const SizedBox(height: _titleBottomSpacing),
-            _buildSectionTitle('Amenities'),
+            _buildSectionTitle('Gender Preference'),
             const SizedBox(height: _sectionSpacing),
-            _buildAmenitiesSection(),
+            _buildGenderPreferenceSection(),
           ],
         ),
       ),
@@ -291,30 +290,55 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
   }
 
   Widget _buildRoomTypeSection() {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _buildSelectButton(
-            label: 'All',
-            isSelected: _roomType == 'all',
-            onTap: () => setState(() => _roomType = 'all'),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSelectButton(
+                label: 'All',
+                isSelected: _roomType == 'all',
+                onTap: () => setState(() => _roomType = 'all'),
+              ),
+            ),
+            const SizedBox(width: _itemSpacing),
+            Expanded(
+              child: _buildSelectButton(
+                label: 'Solo',
+                isSelected: _roomType == 'solo',
+                onTap: () => setState(() => _roomType = 'solo'),
+              ),
+            ),
+            const SizedBox(width: _itemSpacing),
+            Expanded(
+              child: _buildSelectButton(
+                label: 'Shared',
+                isSelected: _roomType == 'shared',
+                onTap: () => setState(() => _roomType = 'shared'),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: _itemSpacing),
-        Expanded(
-          child: _buildSelectButton(
-            label: 'Solo',
-            isSelected: _roomType == 'solo',
-            onTap: () => setState(() => _roomType = 'solo'),
-          ),
-        ),
-        const SizedBox(width: _itemSpacing),
-        Expanded(
-          child: _buildSelectButton(
-            label: 'Shared',
-            isSelected: _roomType == 'shared',
-            onTap: () => setState(() => _roomType = 'shared'),
-          ),
+        const SizedBox(height: _itemSpacing),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSelectButton(
+                label: 'Studio',
+                isSelected: _roomType == 'studio',
+                onTap: () => setState(() => _roomType = 'studio'),
+              ),
+            ),
+            const SizedBox(width: _itemSpacing),
+            Expanded(
+              child: _buildSelectButton(
+                label: 'Apartment',
+                isSelected: _roomType == 'apartment',
+                onTap: () => setState(() => _roomType = 'apartment'),
+              ),
+            ),
+            const Expanded(child: SizedBox()),
+          ],
         ),
       ],
     );
@@ -358,28 +382,33 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
     );
   }
 
-  Widget _buildAmenitiesSection() {
-    return Wrap(
-      spacing: _itemSpacing,
-      runSpacing: _itemSpacing,
-      children: widget.availableAmenities.map((amenity) {
-        final isSelected = _selectedAmenities.contains(amenity);
-        return IntrinsicWidth(
+  Widget _buildGenderPreferenceSection() {
+    return Row(
+      children: [
+        Expanded(
           child: _buildSelectButton(
-            label: amenity,
-            isSelected: isSelected,
-            onTap: () {
-              setState(() {
-                if (isSelected) {
-                  _selectedAmenities.remove(amenity);
-                } else {
-                  _selectedAmenities.add(amenity);
-                }
-              });
-            },
+            label: 'Any',
+            isSelected: _genderPreference == 'any',
+            onTap: () => setState(() => _genderPreference = 'any'),
           ),
-        );
-      }).toList(),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildSelectButton(
+            label: 'Male',
+            isSelected: _genderPreference == 'male',
+            onTap: () => setState(() => _genderPreference = 'male'),
+          ),
+        ),
+        const SizedBox(width: _itemSpacing),
+        Expanded(
+          child: _buildSelectButton(
+            label: 'Female',
+            isSelected: _genderPreference == 'female',
+            onTap: () => setState(() => _genderPreference = 'female'),
+          ),
+        ),
+      ],
     );
   }
 
@@ -402,16 +431,16 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '0',
-            hintStyle: const TextStyle(color: _textTertiary, fontSize: 14),
+            hintStyle: TextStyle(color: _textTertiary, fontSize: 14),
             filled: true,
             fillColor: _unselectedColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_inputBorderRadius),
-              borderSide: const BorderSide(color: _unselectedBorder),
+              borderSide: BorderSide(color: _unselectedBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_inputBorderRadius),
-              borderSide: const BorderSide(color: _unselectedBorder),
+              borderSide: BorderSide(color: _unselectedBorder),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_inputBorderRadius),
@@ -424,7 +453,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
             errorText: error,
             errorStyle: const TextStyle(color: Colors.red, fontSize: 12),
           ),
-          style: const TextStyle(color: _textPrimary, fontSize: 14),
+          style: TextStyle(color: _textPrimary, fontSize: 14),
         ),
       ],
     );
@@ -453,7 +482,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
 
   Widget _buildActionButtons() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: _borderColor)),
       ),
@@ -478,7 +507,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
           color: _lightBg,
           border: Border.all(color: _borderColor),
         ),
-        child: const Text(
+        child: Text(
           'Reset',
           style: _buttonTextStyle,
           textAlign: TextAlign.center,
@@ -508,7 +537,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(_buttonBorderRadius),
       gradient: isSelected
-          ? const LinearGradient(
+          ? LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [_selectedColorStart, _selectedColorEnd],
@@ -523,7 +552,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
   BoxDecoration _buildSelectedButtonDecoration() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(_buttonBorderRadius),
-      gradient: const LinearGradient(
+      gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [_selectedColorStart, _selectedColorEnd],
@@ -553,7 +582,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
       _maxPriceController.clear();
       _roomType = 'all';
       _capacity = 'any';
-      _selectedAmenities.clear();
+      _genderPreference = 'any';
       _minPriceError = null;
       _maxPriceError = null;
     });
@@ -569,7 +598,7 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
           : double.tryParse(_maxPriceController.text),
       'roomType': _roomType,
       'capacity': _capacity,
-      'amenities': _selectedAmenities,
+      'genderPreference': _genderPreference,
     });
     // Note: Navigation should be handled by the parent wrapper (HomeFilterModal, SearchFilterModal)
     // This ensures proper route management in showModalBottomSheet context

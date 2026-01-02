@@ -150,28 +150,27 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   ) async {
     _currentFilter = event.filter;
 
-    // If there's a current query, search with filters
-    if (event.currentQuery != null && event.currentQuery!.isNotEmpty) {
-      emit(const SearchLoadingState());
-      try {
-        final results = await repository.searchWithFilters(
-          event.currentQuery!,
-          event.filter,
-          limit: 10,
-          offset: 0,
-        );
+    // Always search with filters (even with empty query to filter all listings)
+    emit(const SearchLoadingState());
+    try {
+      final query = event.currentQuery ?? '';
+      final results = await repository.searchWithFilters(
+        query,
+        event.filter,
+        limit: 10,
+        offset: 0,
+      );
 
-        emit(SearchSuccessState(
-          results: results,
-          query: event.currentQuery!,
-          currentOffset: 0,
-          totalResults: results.length,
-          hasMoreResults: results.length == 10,
-          activeFilter: event.filter,
-        ));
-      } catch (e) {
-        emit(SearchErrorState('Failed to apply filters: ${e.toString()}'));
-      }
+      emit(SearchSuccessState(
+        results: results,
+        query: query,
+        currentOffset: 0,
+        totalResults: results.length,
+        hasMoreResults: results.length == 10,
+        activeFilter: event.filter,
+      ));
+    } catch (e) {
+      emit(SearchErrorState('Failed to apply filters: ${e.toString()}'));
     }
   }
 

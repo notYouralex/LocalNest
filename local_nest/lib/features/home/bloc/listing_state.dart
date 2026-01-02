@@ -23,14 +23,16 @@ class ListingLoadingState extends ListingState {
 class ListingLoadedState extends ListingState {
   final List<ListingModel> listings;
   final bool hasMoreData;
+  final bool isFiltered;
 
   const ListingLoadedState({
     required this.listings,
     this.hasMoreData = true,
+    this.isFiltered = false,
   });
 
   @override
-  List<Object?> get props => [listings, hasMoreData];
+  List<Object?> get props => [listings, hasMoreData, isFiltered];
 }
 
 /// Loading more listings state

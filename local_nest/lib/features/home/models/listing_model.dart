@@ -8,6 +8,12 @@ class ListingModel {
   final List<String> amenities;
   final bool isAvailable;
   final bool isFavorite;
+  
+  // Additional fields for filtering
+  final String roomType;
+  final int availableSlots;
+  final String genderPreference;
+  final double monthlyRent; // Alias for price for filtering clarity
 
   const ListingModel({
     required this.id,
@@ -18,7 +24,11 @@ class ListingModel {
     required this.amenities,
     this.isAvailable = true,
     this.isFavorite = false,
-  });
+    this.roomType = 'Solo',
+    this.availableSlots = 1,
+    this.genderPreference = 'Any',
+    double? monthlyRent,
+  }) : monthlyRent = monthlyRent ?? price;
 
   /// Create a copy with optional field updates
   ListingModel copyWith({
@@ -30,6 +40,9 @@ class ListingModel {
     List<String>? amenities,
     bool? isAvailable,
     bool? isFavorite,
+    String? roomType,
+    int? availableSlots,
+    String? genderPreference,
   }) {
     return ListingModel(
       id: id ?? this.id,
@@ -40,6 +53,9 @@ class ListingModel {
       amenities: amenities ?? this.amenities,
       isAvailable: isAvailable ?? this.isAvailable,
       isFavorite: isFavorite ?? this.isFavorite,
+      roomType: roomType ?? this.roomType,
+      availableSlots: availableSlots ?? this.availableSlots,
+      genderPreference: genderPreference ?? this.genderPreference,
     );
   }
 
@@ -55,7 +71,10 @@ class ListingModel {
           imageUrl == other.imageUrl &&
           amenities == other.amenities &&
           isAvailable == other.isAvailable &&
-          isFavorite == other.isFavorite;
+          isFavorite == other.isFavorite &&
+          roomType == other.roomType &&
+          availableSlots == other.availableSlots &&
+          genderPreference == other.genderPreference;
 
   @override
   int get hashCode =>
@@ -66,5 +85,8 @@ class ListingModel {
       imageUrl.hashCode ^
       amenities.hashCode ^
       isAvailable.hashCode ^
-      isFavorite.hashCode;
+      isFavorite.hashCode ^
+      roomType.hashCode ^
+      availableSlots.hashCode ^
+      genderPreference.hashCode;
 }

@@ -56,6 +56,32 @@ class GetFavoriteListingsEvent extends ListingEvent {
 class RefreshListingsEvent extends ListingEvent {
   const RefreshListingsEvent();
 }
+
+/// Filter listings by criteria
+class FilterListingsEvent extends ListingEvent {
+  final double? minPrice;
+  final double? maxPrice;
+  final String roomType;
+  final String capacity;
+  final String genderPreference;
+
+  const FilterListingsEvent({
+    this.minPrice,
+    this.maxPrice,
+    this.roomType = 'all',
+    this.capacity = 'any',
+    this.genderPreference = 'any',
+  });
+
+  @override
+  List<Object?> get props => [minPrice, maxPrice, roomType, capacity, genderPreference];
+}
+
+/// Clear all filters
+class ClearFiltersEvent extends ListingEvent {
+  const ClearFiltersEvent();
+}
+
 /// Watch listings for real-time updates
 class WatchListingsEvent extends ListingEvent {
   const WatchListingsEvent();

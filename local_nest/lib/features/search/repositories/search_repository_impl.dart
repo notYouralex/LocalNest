@@ -68,12 +68,28 @@ class SearchRepositoryImpl implements SearchRepository {
     int offset = 0,
   }) async {
     try {
+      // Convert gender preference to database format
+      // Filter uses 'male'/'female', database stores 'Male Only'/'Female Only'
+      String? dbGenderPreference;
+      if (filter.genderPreference == 'male') {
+        dbGenderPreference = 'Male Only';
+      } else if (filter.genderPreference == 'female') {
+        dbGenderPreference = 'Female Only';
+      }
+      
+      // Convert room type to database format (capitalize first letter)
+      String? dbRoomType;
+      if (filter.roomType != 'all') {
+        dbRoomType = filter.roomType[0].toUpperCase() + filter.roomType.substring(1);
+      }
+      
       // Use Firestore's searchListings method with filters
       final listings = await _firestoreRepo.searchListings(
-        city: query.isNotEmpty ? null : null, // TODO: parse city from query
-        roomType: filter.roomType != 'all' ? filter.roomType : null,
+        city: null,
+        roomType: dbRoomType,
         minRent: filter.minPrice,
         maxRent: filter.maxPrice,
+        genderPreference: dbGenderPreference,
       );
       
       final favoriteIds = await _getFavoriteIds();
@@ -91,12 +107,34 @@ class SearchRepositoryImpl implements SearchRepository {
             .toList();
       }
 
+      // Apply capacity filter (client-side)
+      if (filter.capacity != 'any') {
+        final minCapacity = _parseCapacity(filter.capacity);
+        results = results
+            .where((listing) => listing.availableSlots >= minCapacity)
+            .toList();
+      }
+
       // TODO: Apply amenities filter (need to add amenities to Listing model)
       
       // TODO: Implement pagination with offset
       return results;
     } catch (e) {
       throw Exception('Failed to search with filters: $e');
+    }
+  }
+
+  /// Helper to parse capacity string to minimum value
+  int _parseCapacity(String capacity) {
+    switch (capacity) {
+      case '1+':
+        return 1;
+      case '2+':
+        return 2;
+      case '4+':
+        return 4;
+      default:
+        return 0;
     }
   }
 

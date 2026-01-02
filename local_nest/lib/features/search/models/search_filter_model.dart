@@ -4,8 +4,9 @@ import 'package:equatable/equatable.dart';
 class SearchFilter extends Equatable {
   final double? minPrice;
   final double? maxPrice;
-  final String roomType; // 'all', 'solo', 'shared'
+  final String roomType; // 'all', 'solo', 'shared', 'studio', 'apartment'
   final String capacity; // 'any', '1+', '2+', '4+'
+  final String genderPreference; // 'any', 'male', 'female'
   final List<String> amenities;
 
   const SearchFilter({
@@ -13,6 +14,7 @@ class SearchFilter extends Equatable {
     this.maxPrice,
     this.roomType = 'all',
     this.capacity = 'any',
+    this.genderPreference = 'any',
     this.amenities = const [],
   });
 
@@ -22,6 +24,7 @@ class SearchFilter extends Equatable {
     double? maxPrice,
     String? roomType,
     String? capacity,
+    String? genderPreference,
     List<String>? amenities,
   }) {
     return SearchFilter(
@@ -29,6 +32,7 @@ class SearchFilter extends Equatable {
       maxPrice: maxPrice ?? this.maxPrice,
       roomType: roomType ?? this.roomType,
       capacity: capacity ?? this.capacity,
+      genderPreference: genderPreference ?? this.genderPreference,
       amenities: amenities ?? this.amenities,
     );
   }
@@ -39,6 +43,7 @@ class SearchFilter extends Equatable {
       maxPrice != null ||
       roomType != 'all' ||
       capacity != 'any' ||
+      genderPreference != 'any' ||
       amenities.isNotEmpty;
 
   /// Clear all filters
@@ -52,6 +57,7 @@ class SearchFilter extends Equatable {
         maxPrice,
         roomType,
         capacity,
+        genderPreference,
         amenities,
       ];
 }

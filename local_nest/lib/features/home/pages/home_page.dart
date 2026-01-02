@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../listing_detail/extensions/listing_model_extension.dart';
 import '../bloc/listing_bloc.dart';
 import '../bloc/listing_event.dart';
 import '../bloc/listing_state.dart';
 import '../constants/home_constants.dart';
+import '../models/listing_model.dart';
 import '../repositories/listing_repository_impl.dart';
 import '../widgets/home_filter_modal.dart';
 import '../widgets/home_header.dart';
@@ -56,14 +58,14 @@ class _HomePageState extends State<HomePage> {
       ),
       builder: (context) => HomeFilterModal(
         onApplyFilters: (filters) {
-          // Handle filter application
-          // TODO: Emit event to BLoC with selected filters
-          // _listingBloc.add(FilterListingsEvent(
-          //   minPrice: filters['minPrice'],
-          //   maxPrice: filters['maxPrice'],
-          //   roomType: filters['roomType'],
-          //   capacity: filters['capacity'],
-          // ));
+          // Apply filters to listing BLoC
+          _listingBloc.add(FilterListingsEvent(
+            minPrice: filters['minPrice'] as double?,
+            maxPrice: filters['maxPrice'] as double?,
+            roomType: filters['roomType'] as String? ?? 'all',
+            capacity: filters['capacity'] as String? ?? 'any',
+            genderPreference: filters['genderPreference'] as String? ?? 'any',
+          ));
         },
       ),
     );
@@ -141,7 +143,14 @@ class _HomePageState extends State<HomePage> {
         }
 
         if (state is ListingLoadedState) {
-          return _buildListingsGrid(context, state.listings);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Show filter indicator if filters are active
+              if (state.isFiltered) _buildFilterIndicator(),
+              _buildListingsGrid(context, state.listings),
+            ],
+          );
         }
 
         return _buildEmptyState();
@@ -201,7 +210,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Build grid of listing cards
-  Widget _buildListingsGrid(BuildContext context, List listings) {
+  Widget _buildListingsGrid(BuildContext context, List<ListingModel> listings) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -232,6 +241,57 @@ class _HomePageState extends State<HomePage> {
           },
         );
       },
+    );
+  }
+
+  /// Build filter indicator chip
+  Widget _buildFilterIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha:0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha:0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.filter_list,
+              size: 16,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Filters applied',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: () {
+                _listingBloc.add(const ClearFiltersEvent());
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                child: Icon(
+                  Icons.close,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

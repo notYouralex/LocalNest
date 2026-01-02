@@ -16,6 +16,11 @@ extension ListingToUIExtension on Listing {
       amenities: _extractAmenities(),
       isAvailable: status == 'active' && availableSlots > 0,
       isFavorite: favoriteIds.contains(id),
+      // Add filter fields
+      roomType: roomType,
+      availableSlots: availableSlots,
+      genderPreference: genderPreference,
+      monthlyRent: monthlyRent,
     );
   }
 
