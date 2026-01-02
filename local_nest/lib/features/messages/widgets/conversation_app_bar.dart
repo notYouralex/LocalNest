@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme/theme.dart';
+import '../../../core/widgets/user_avatar.dart';
 import '../bloc/bloc.dart';
 
 /// App bar widget for Conversation Detail page
@@ -29,20 +30,35 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
           color: AppColors.textPrimary,
           onPressed: () => context.pop(),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              loadedState.userName,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+            UserAvatar(
+              imageUrl: loadedState.userAvatar.isNotEmpty 
+                  ? loadedState.userAvatar 
+                  : null,
+              displayName: loadedState.userName,
+              radius: 20,
+              fontSize: 16,
             ),
-            Text(
-              loadedState.listingName,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loadedState.userName,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    loadedState.listingName,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Conversation model representing a message conversation
 class ConversationModel extends Equatable {
   final String id;
-  final String userId;
+  final String odId; // Other user's ID
   final String userName;
   final String userAvatar;
   final String listingId;
@@ -15,7 +15,7 @@ class ConversationModel extends Equatable {
 
   const ConversationModel({
     required this.id,
-    required this.userId,
+    this.odId = '', // Other user's ID (optional for backwards compatibility)
     required this.userName,
     required this.userAvatar,
     required this.listingId,
@@ -26,10 +26,13 @@ class ConversationModel extends Equatable {
     this.isPinned = false,
   });
 
+  // Legacy getter for backwards compatibility
+  String get userId => odId;
+
   /// Create a copy with optional field updates
   ConversationModel copyWith({
     String? id,
-    String? userId,
+    String? odId,
     String? userName,
     String? userAvatar,
     String? listingId,
@@ -41,7 +44,7 @@ class ConversationModel extends Equatable {
   }) {
     return ConversationModel(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
+      odId: odId ?? this.odId,
       userName: userName ?? this.userName,
       userAvatar: userAvatar ?? this.userAvatar,
       listingId: listingId ?? this.listingId,
@@ -56,7 +59,7 @@ class ConversationModel extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    userId,
+    odId,
     userName,
     userAvatar,
     listingId,

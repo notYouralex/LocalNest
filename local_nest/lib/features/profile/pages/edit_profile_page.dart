@@ -1,21 +1,24 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
+import '../../../core/services/cloudinary_service.dart';
 import '../constants/edit_profile_modal_style.dart';
 import '../widgets/edit_profile_input_field.dart';
+import '../bloc/user_bloc.dart';
+import '../bloc/user_event.dart';
+import '../models/user_profile.dart';
 
 /// Edit profile bottom sheet modal
 /// Shows form to edit user profile information
 class EditProfilePage extends StatefulWidget {
-  final String? initialFullName;
-  final String? initialEmail;
-  final String? initialPhone;
+  final UserProfile userProfile;
 
   const EditProfilePage({
     super.key,
-    this.initialFullName = 'Juan Dela Cruz',
-    this.initialEmail = 'juandc@email.com',
-    this.initialPhone = '+63 917 123 4567',
+    required this.userProfile,
   });
 
   @override
@@ -27,19 +30,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   bool _isLoading = false;
+  String? _selectedImagePath;
+  String? _uploadedImageUrl;
+  final ImagePicker _imagePicker = ImagePicker();
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   @override
   void initState() {
     super.initState();
     _fullNameController = TextEditingController(
-      text: widget.initialFullName,
+      text: widget.userProfile.displayName ?? '',
     );
     _emailController = TextEditingController(
-      text: widget.initialEmail,
+      text: widget.userProfile.email,
     );
     _phoneController = TextEditingController(
-      text: widget.initialPhone,
+      text: widget.userProfile.phoneNumber ?? '',
     );
+    _uploadedImageUrl = widget.userProfile.profileImageUrl;
   }
 
   @override
@@ -55,20 +63,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return names.map((name) => name.isEmpty ? '' : name[0]).join().toUpperCase();
   }
 
-  void _handleChangePhoto() {
-    // TODO: Implement image picker
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Image picker not yet implemented')),
-    );
+  Future<void> _handleChangePhoto() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedImagePath = image.path;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _handleSaveChanges() async {
-    if (_fullNameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _phoneController.text.isEmpty) {
+  Future<void> _handleSaveChanges() async {
+    if (_fullNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please fill in all fields'),
+          content: Text('Please enter your name'),
           backgroundColor: Colors.red,
         ),
       );
@@ -78,11 +103,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Save to backend/API
-      await Future.delayed(const Duration(milliseconds: 500));
+      String? profileImageUrl = _uploadedImageUrl;
 
+      // Upload image if new one is selected
+      if (_selectedImagePath != null) {
+        profileImageUrl = await _cloudinaryService.uploadImage(
+          _selectedImagePath!,
+          folder: 'localnest/profiles',
+        );
+      }
+
+      // Update profile via BLoC
       if (mounted) {
-        Navigator.pop(context);
+        context.read<UserBloc>().add(
+          UpdateUserProfileEvent(
+            userId: widget.userProfile.id,
+            displayName: _fullNameController.text.trim(),
+            phoneNumber: _phoneController.text.trim().isEmpty 
+                ? null 
+                : _phoneController.text.trim(),
+            profileImageUrl: profileImageUrl,
+          ),
+        );
+
+        Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile updated successfully'),
@@ -94,7 +138,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Error updating profile: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -135,11 +179,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: EditProfileModalStyle.fieldSpacing),
-                  // Email field
+                  // Email field (read-only)
                   EditProfileInputField(
                     controller: _emailController,
                     label: 'Email Address',
                     icon: Icons.email,
+                    readOnly: true,
                   ),
                   const SizedBox(height: EditProfileModalStyle.fieldSpacing),
                   // Phone field
@@ -199,27 +244,55 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildAvatar() {
-    return Container(
-      width: EditProfileModalStyle.avatarRadius,
-      height: EditProfileModalStyle.avatarRadius,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: AppColors.primaryGradient,
-        ),
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          _initials,
-          style: AppTextStyles.heading1.copyWith(
-            fontSize: EditProfileModalStyle.avatarFontSize,
-            fontWeight: FontWeight.w600,
+    // Show selected image, uploaded image, or initials
+    if (_selectedImagePath != null) {
+      return Container(
+        width: EditProfileModalStyle.avatarRadius,
+        height: EditProfileModalStyle.avatarRadius,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: FileImage(File(_selectedImagePath!)),
+            fit: BoxFit.cover,
           ),
         ),
-      ),
-    );
+      );
+    } else if (_uploadedImageUrl != null && _uploadedImageUrl!.isNotEmpty) {
+      return Container(
+        width: EditProfileModalStyle.avatarRadius,
+        height: EditProfileModalStyle.avatarRadius,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: NetworkImage(_uploadedImageUrl!),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: EditProfileModalStyle.avatarRadius,
+        height: EditProfileModalStyle.avatarRadius,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: AppColors.primaryGradient,
+          ),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            _initials,
+            style: AppTextStyles.heading1.copyWith(
+              fontSize: EditProfileModalStyle.avatarFontSize,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textWhite,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildChangePhotoButton() {

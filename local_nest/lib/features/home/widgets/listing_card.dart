@@ -5,6 +5,7 @@ import 'package:local_nest/app/theme/app_text_styles.dart';
 import 'package:local_nest/features/home/bloc/listing_bloc.dart';
 import 'package:local_nest/features/home/bloc/listing_event.dart';
 import 'package:local_nest/features/home/models/listing_model.dart';
+import '../../favorites/bloc/favorites_cubit.dart';
 
 /// Listing card widget for displaying a single property listing
 class ListingCard extends StatelessWidget {
@@ -38,7 +39,7 @@ class ListingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image with badges
-            _buildImageSection(),
+            _buildImageSection(context),
             // Content section
             _buildContentSection(context),
           ],
@@ -48,7 +49,7 @@ class ListingCard extends StatelessWidget {
   }
 
   /// Build image section with availability badge
-  Widget _buildImageSection() {
+  Widget _buildImageSection(BuildContext context) {
     return Stack(
       children: [
         // Image
@@ -106,19 +107,22 @@ class ListingCard extends StatelessWidget {
         Positioned(
           top: 12,
           left: 12,
-          child: _buildFavoriteButton(),
+          child: _buildFavoriteButton(context),
         ),
       ],
     );
   }
 
   /// Build favorite button
-  Widget _buildFavoriteButton() {
-    return GestureDetector(
-      onTap: () {
-        // This will be handled by BLoC
-      },
-      child: Container(
+  Widget _buildFavoriteButton(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.read<ListingBloc>().add(ToggleFavoriteEvent(listing.id));
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
@@ -138,6 +142,7 @@ class ListingCard extends StatelessWidget {
             color: listing.isFavorite ? AppColors.error : AppColors.textSecondary,
             size: 20,
           ),
+        ),
         ),
       ),
     );
@@ -373,30 +378,34 @@ class ListingCardWithBloc extends StatelessWidget {
 
   /// Build favorite button with BLoC integration
   Widget _buildFavoriteButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        context.read<ListingBloc>().add(ToggleFavoriteEvent(listing.id));
-        onFavoriteChanged?.call();
-      },
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.read<ListingBloc>().add(ToggleFavoriteEvent(listing.id));
+          onFavoriteChanged?.call();
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Icon(
+              listing.isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: listing.isFavorite ? AppColors.error : AppColors.textSecondary,
+              size: 20,
             ),
-          ],
-        ),
-        child: Center(
-          child: Icon(
-            listing.isFavorite ? Icons.favorite : Icons.favorite_border,
-            color: listing.isFavorite ? AppColors.error : AppColors.textSecondary,
-            size: 20,
           ),
         ),
       ),
@@ -518,6 +527,252 @@ class ListingCardWithBloc extends StatelessWidget {
           fontWeight: FontWeight.w500,
           fontSize: 11,
         ),
+      ),
+    );
+  }
+}
+
+/// Self-contained listing card that handles favorites independently
+/// Use this in pages that don't have ListingBloc in context (e.g., Search)
+class FavoriteListingCard extends StatelessWidget {
+  final ListingModel listing;
+  final VoidCallback? onTap;
+  final VoidCallback? onFavoriteChanged;
+
+  const FavoriteListingCard({
+    Key? key,
+    required this.listing,
+    this.onTap,
+    this.onFavoriteChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<FavoritesCubit, FavoritesState>(
+      builder: (context, favoritesState) {
+        final isFavorite = favoritesState.isFavorite(listing.id);
+        
+        return GestureDetector(
+          onTap: onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImageSection(context, isFavorite),
+                _buildContentSection(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImageSection(BuildContext context, bool isFavorite) {
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          height: 200,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            color: AppColors.border,
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            child: Image.network(
+              listing.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: AppColors.greenBackground,
+                  child: const Center(
+                    child: Icon(Icons.image_not_supported_outlined),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        Positioned(
+          top: 12,
+          right: 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.successDark,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              listing.isAvailable ? 'Available' : 'Unavailable',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textWhite,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 12,
+          left: 12,
+          child: _buildFavoriteButton(context, isFavorite),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFavoriteButton(BuildContext context, bool isFavorite) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.read<FavoritesCubit>().toggleFavorite(listing.id);
+          onFavoriteChanged?.call();
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? AppColors.error : AppColors.textSecondary,
+              size: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 20, 12, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      listing.title,
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            listing.location,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '\u20B1${listing.price.toStringAsFixed(0)}',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.warning,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    '/month',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Divider(color: AppColors.border, thickness: 1, height: 1),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: listing.amenities
+                .take(3)
+                .map((amenity) => Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.successLight,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          amenity,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textWhite,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
       ),
     );
   }

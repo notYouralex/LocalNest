@@ -56,3 +56,7 @@ class GetFavoriteListingsEvent extends ListingEvent {
 class RefreshListingsEvent extends ListingEvent {
   const RefreshListingsEvent();
 }
+/// Watch listings for real-time updates
+class WatchListingsEvent extends ListingEvent {
+  const WatchListingsEvent();
+}

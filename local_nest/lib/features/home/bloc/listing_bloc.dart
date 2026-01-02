@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_nest/features/home/models/listing_model.dart';
 import 'package:local_nest/features/home/bloc/listing_event.dart';
@@ -7,6 +8,7 @@ import 'package:local_nest/features/home/repositories/listing_repository.dart';
 /// BLoC for managing listing state and business logic
 class ListingBloc extends Bloc<ListingEvent, ListingState> {
   final ListingRepository _repository;
+  StreamSubscription<List<ListingModel>>? _listingsSubscription;
   
   int _currentOffset = 0;
   List<ListingModel> _allListings = [];
@@ -21,6 +23,10 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     on<SearchListingsEvent>(_onSearchListings);
     on<GetFavoriteListingsEvent>(_onGetFavoriteListings);
     on<RefreshListingsEvent>(_onRefreshListings);
+    on<WatchListingsEvent>(_onWatchListings);
+    
+    // Start watching listings immediately
+    add(const WatchListingsEvent());
   }
 
   /// Handle fetch listings event
@@ -108,21 +114,26 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
         
         emit(ListingSearchResultsState(updatedResults));
       } else if (state is ListingFavoritesState) {
-        // Update favorites list if we're viewing favorites
+        // Update favorites list - remove if unfavorited
         final currentState = state as ListingFavoritesState;
-        final updatedFavorites = currentState.favorites.map((listing) {
-          if (listing.id == event.listingId) {
-            return updatedListing;
-          }
-          return listing;
-        }).toList();
         
-        emit(ListingFavoritesState(updatedFavorites));
+        if (updatedListing.isFavorite) {
+          // Still favorited - just update the listing
+          final updatedFavorites = currentState.favorites.map((listing) {
+            if (listing.id == event.listingId) {
+              return updatedListing;
+            }
+            return listing;
+          }).toList();
+          emit(ListingFavoritesState(updatedFavorites));
+        } else {
+          // Unfavorited - remove from the list
+          final updatedFavorites = currentState.favorites
+              .where((listing) => listing.id != event.listingId)
+              .toList();
+          emit(ListingFavoritesState(updatedFavorites));
+        }
       }
-      
-      // Always fetch fresh favorites list to keep all pages in sync
-      final updatedFavorites = await _repository.getFavoriteListings();
-      emit(ListingFavoritesState(updatedFavorites));
     } catch (e) {
       emit(ListingErrorState(e.toString()));
     }
@@ -166,19 +177,57 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     Emitter<ListingState> emit,
   ) async {
     try {
-      _currentOffset = 0;
-      final listings = await _repository.fetchListings(
-        limit: _pageSize,
-        offset: 0,
-      );
-      
-      _allListings = listings;
-      emit(ListingLoadedState(
-        listings: listings,
-        hasMoreData: listings.length >= _pageSize,
-      ));
+      // Use cached listings from stream if available
+      if (_allListings.isNotEmpty) {
+        emit(ListingLoadedState(
+          listings: _allListings,
+          hasMoreData: _allListings.length >= _pageSize,
+        ));
+      } else {
+        // Fallback to fetching if no cached data
+        _currentOffset = 0;
+        final listings = await _repository.fetchListings(
+          limit: _pageSize,
+          offset: 0,
+        );
+        
+        _allListings = listings;
+        emit(ListingLoadedState(
+          listings: listings,
+          hasMoreData: listings.length >= _pageSize,
+        ));
+      }
     } catch (e) {
       emit(ListingErrorState(e.toString()));
     }
+  }
+
+  /// Handle watch listings event - subscribes to real-time updates
+  Future<void> _onWatchListings(
+    WatchListingsEvent event,
+    Emitter<ListingState> emit,
+  ) async {
+    try {
+      emit(const ListingLoadingState());
+      
+      await _listingsSubscription?.cancel();
+      _listingsSubscription = _repository.watchListings().listen(
+        (listings) {
+          _allListings = listings;
+          add(const RefreshListingsEvent()); // Trigger UI update
+        },
+        onError: (error) {
+          emit(ListingErrorState(error.toString()));
+        },
+      );
+    } catch (e) {
+      emit(ListingErrorState(e.toString()));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _listingsSubscription?.cancel();
+    return super.close();
   }
 }

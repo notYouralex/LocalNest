@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../app/theme/theme.dart';
 import '../bloc/bloc.dart';
 import '../models/models.dart';
@@ -58,7 +59,7 @@ class _ConversationDetailPageState extends State<ConversationDetailPage> {
 
   void _sendMessage() {
     final content = _messageController.text.trim();
-    if (content.isEmpty || content.length > 200) return;
+    if (content.isEmpty || content.length > 250) return;
 
     _conversationBloc.add(
       SendMessageEvent(
@@ -147,13 +148,6 @@ class _ConversationDetailPageState extends State<ConversationDetailPage> {
     showModalBottomSheet(
       context: context,
       builder: (context) => ConversationMenuBottomSheet(
-        onPin: () {
-          Navigator.pop(context);
-          _conversationBloc.add(PinConversationEvent(widget.conversationId));
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Conversation pinned')),
-          );
-        },
         onBlock: () {
           Navigator.pop(context);
           _showBlockConfirmation();
@@ -264,6 +258,43 @@ class _ConversationDetailPageState extends State<ConversationDetailPage> {
   }
 
   Widget _buildMessagesList(ConversationMessagesLoadedState state) {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    
+    // Show empty state if no messages
+    if (state.messages.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.chat_bubble_outline,
+                size: 64,
+                color: AppColors.textSecondary.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'No messages yet',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Start the conversation by sending a message',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -282,7 +313,7 @@ class _ConversationDetailPageState extends State<ConversationDetailPage> {
               ),
             MessageBubble(
               message: message,
-              isCurrentUser: message.senderId == 'currentUser',
+              isCurrentUser: message.senderId == currentUserId,
               onLongPress: () => _showMessageOptions(message, state.messages),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../listings/repositories/firestore_listing_repository.dart';
 import '../../../app/theme/theme.dart';
 import '../models/models.dart';
 import '../widgets/widgets.dart';
@@ -19,11 +20,24 @@ class ListingDetailPage extends StatefulWidget {
 class _ListingDetailPageState extends State<ListingDetailPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final FirestoreListingRepository _repository = FirestoreListingRepositoryImpl();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    
+    // Track view when page opens
+    _trackView();
+  }
+
+  Future<void> _trackView() async {
+    try {
+      await _repository.incrementViews(widget.listing.id);
+    } catch (e) {
+      // Silently fail - don't interrupt user experience
+      print('Failed to track view: $e');
+    }
   }
 
   @override
@@ -36,7 +50,9 @@ class _ListingDetailPageState extends State<ListingDetailPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
+      body: SafeArea(
+        top: false, // Allow image carousel to extend to top
+        child: CustomScrollView(
         slivers: [
           // Header with Image Carousel
           SliverAppBar(
@@ -47,7 +63,6 @@ class _ListingDetailPageState extends State<ListingDetailPage>
             flexibleSpace: FlexibleSpaceBar(
               background: ImageCarousel(
                 images: widget.listing.images,
-                isLandlordVerified: widget.listing.isLandlordVerified,
               ),
             ),
           ),
@@ -100,17 +115,16 @@ class _ListingDetailPageState extends State<ListingDetailPage>
                   // Overview Tab
                   OverviewTab(
                     description: widget.listing.description,
-                    inclusions: widget.listing.inclusions,
-                    houseRules: widget.listing.houseRules,
                     landlordName: widget.listing.landlordName,
-                    isLandlordVerified: widget.listing.isLandlordVerified,
+                    landlordProfileImageUrl: widget.listing.landlordProfileImageUrl,
                   ),
 
                   // Location Tab
                   LocationTab(
                     address: widget.listing.address,
                     barangay: widget.listing.barangay,
-                    nearbyLandmarks: widget.listing.nearbyLandmarks,
+                    latitude: widget.listing.latitude,
+                    longitude: widget.listing.longitude,
                   ),
                 ],
               ),
@@ -126,13 +140,19 @@ class _ListingDetailPageState extends State<ListingDetailPage>
                 children: [
                   const Divider(height: 1),
                   const SizedBox(height: tabPaddingVertical),
-                  ActionButtons(),
+                  ActionButtons(
+                    listingId: widget.listing.id,
+                    listingTitle: widget.listing.title,
+                    landlordId: widget.listing.landlordId,
+                    landlordName: widget.listing.landlordName,
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
         ],
+      ),
       ),
     );
   }

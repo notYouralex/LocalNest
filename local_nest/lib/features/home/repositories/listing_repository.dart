@@ -19,4 +19,7 @@ abstract class ListingRepository {
 
   /// Get favorite listings
   Future<List<ListingModel>> getFavoriteListings();
+  
+  /// Watch listings stream for real-time updates
+  Stream<List<ListingModel>> watchListings();
 }

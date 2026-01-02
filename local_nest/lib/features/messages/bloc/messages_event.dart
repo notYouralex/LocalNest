@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../models/models.dart';
 
 /// Abstract class for messages events
 abstract class MessagesEvent extends Equatable {
@@ -26,4 +27,14 @@ class SearchConversationsEvent extends MessagesEvent {
 /// Event to refresh conversations
 class RefreshConversationsEvent extends MessagesEvent {
   const RefreshConversationsEvent();
+}
+
+/// Event when conversations are updated from stream
+class ConversationsUpdatedEvent extends MessagesEvent {
+  final List<ConversationModel> conversations;
+
+  const ConversationsUpdatedEvent(this.conversations);
+
+  @override
+  List<Object?> get props => [conversations];
 }

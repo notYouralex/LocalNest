@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ConversationMenuBottomSheet extends StatelessWidget {
-  final VoidCallback onPin;
   final VoidCallback onBlock;
   final VoidCallback onReport;
 
   const ConversationMenuBottomSheet({
     super.key,
-    required this.onPin,
     required this.onBlock,
     required this.onReport,
   });
@@ -26,11 +24,6 @@ class ConversationMenuBottomSheet extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.push_pin),
-            title: const Text('Pin to Top'),
-            onTap: onPin,
-          ),
           ListTile(
             leading: const Icon(Icons.block, color: Colors.orange),
             title: const Text('Block User', style: TextStyle(color: Colors.orange)),

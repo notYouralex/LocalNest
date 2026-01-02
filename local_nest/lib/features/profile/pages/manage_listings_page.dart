@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../app/theme/theme.dart';
 import '../constants/manage_listings_constants.dart';
 import '../models/listing_model.dart';
 import '../presentation/widgets/listing_card.dart';
 import '../presentation/widgets/add_listing_button.dart';
+import '../../listings/repositories/firestore_listing_repository.dart';
 import 'add_listing_page.dart';
 
 /// Manage Listings page for landlords
@@ -19,63 +21,47 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
   late List<Listing> _listings;
   bool _isLoading = true;
   String? _errorMessage;
+  final FirestoreListingRepository _repository = FirestoreListingRepositoryImpl();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    _loadListingsFromFirestore();
   }
 
-  /// Initialize listings synchronously
-  void _initializeData() {
+  /// Load real listings from Firestore
+  Future<void> _loadListingsFromFirestore() async {
     try {
-      // Initialize with default/mock data immediately
-      _listings = [
-        Listing(
-          id: '1',
-          title: 'Cozy Haven Boarding House',
-          address: '123 P. Noval St., Sampaloc',
-          price: '₱5,500/mo',
-          roomType: 'Solo',
-          available: '3/5 slots',
-          views: 234,
-          inquiries: 12,
-          isActive: true,
-          createdAt: DateTime.now().subtract(const Duration(days: 30)),
-        ),
-        Listing(
-          id: '2',
-          title: 'Student Hub Residence',
-          address: '456 Dapitan St., Sampaloc',
-          price: '₱4,800/mo',
-          roomType: 'Shared',
-          available: '2/8 slots',
-          views: 189,
-          inquiries: 8,
-          isActive: true,
-          createdAt: DateTime.now().subtract(const Duration(days: 45)),
-        ),
-        Listing(
-          id: '3',
-          title: 'Modern Studio Suites',
-          address: '789 España Blvd., Sampaloc',
-          price: '₱12,000/mo',
-          roomType: 'Studio',
-          available: '0/4 slots',
-          views: 456,
-          inquiries: 23,
-          isActive: false,
-          createdAt: DateTime.now().subtract(const Duration(days: 60)),
-        ),
-      ];
+      setState(() => _isLoading = true);
+      
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
 
-      // Mark as loaded
+      // Fetch landlord's listings from Firestore
+      final firestoreListings = await _repository.getListingsByLandlord(currentUser.uid);
+      
+      // Convert Firestore Listing to UI Listing model
+      _listings = firestoreListings.map((firestoreListing) {
+        return Listing(
+          id: firestoreListing.id,
+          title: firestoreListing.propertyName,
+          address: '${firestoreListing.completeAddress}, ${firestoreListing.city}',
+          price: '₱${firestoreListing.monthlyRent.toStringAsFixed(0)}/mo',
+          roomType: firestoreListing.roomType,
+          available: '${firestoreListing.availableSlots}/${firestoreListing.totalSlots} slots',
+          views: firestoreListing.views,
+          inquiries: firestoreListing.inquiries,
+          isActive: firestoreListing.status == 'active',
+          createdAt: firestoreListing.createdAt,
+        );
+      }).toList();
+
       if (mounted) {
         setState(() => _isLoading = false);
       }
-
-      // TODO: In real app, fetch from Firebase here asynchronously
-      _loadListingsFromBackend();
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -83,86 +69,6 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
           _isLoading = false;
         });
       }
-    }
-  }
-
-  /// Load listings from Firebase/backend (non-blocking)
-  Future<void> _loadListingsFromBackend() async {
-    try {
-      // TODO: Replace with actual Firebase call
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      if (!mounted) return;
-
-      // TODO: Update with real listings
-      // _listings = await FirestoreService.instance
-      //     .collection('listings')
-      //     .where('landlordId', isEqualTo: currentUserId)
-      //     .get()
-      //     .then((snap) => snap.docs.map((doc) => Listing.fromJson(doc.data())).toList());
-      
-      setState(() {
-        // Data updated if needed
-      });
-    } catch (e) {
-      debugPrint('Error loading listings: $e');
-      // Don't show error for background loading, just keep initial data
-    }
-  }
-
-  /// Legacy async load - replaced with sync init above
-  Future<void> _loadListings() async {
-    try {
-      setState(() => _isLoading = true);
-
-      // TODO: Replace with actual Firebase call
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      _listings = [
-        Listing(
-          id: '1',
-          title: 'Cozy Haven Boarding House',
-          address: '123 P. Noval St., Sampaloc',
-          price: '₱5,500/mo',
-          roomType: 'Solo',
-          available: '3/5 slots',
-          views: 234,
-          inquiries: 12,
-          isActive: true,
-          createdAt: DateTime.now().subtract(const Duration(days: 30)),
-        ),
-        Listing(
-          id: '2',
-          title: 'Student Hub Residence',
-          address: '456 Dapitan St., Sampaloc',
-          price: '₱4,800/mo',
-          roomType: 'Shared',
-          available: '2/8 slots',
-          views: 189,
-          inquiries: 8,
-          isActive: true,
-          createdAt: DateTime.now().subtract(const Duration(days: 45)),
-        ),
-        Listing(
-          id: '3',
-          title: 'Modern Studio Suites',
-          address: '789 España Blvd., Sampaloc',
-          price: '₱12,000/mo',
-          roomType: 'Studio',
-          available: '0/4 slots',
-          views: 456,
-          inquiries: 23,
-          isActive: false,
-          createdAt: DateTime.now().subtract(const Duration(days: 60)),
-        ),
-      ];
-
-      setState(() => _isLoading = false);
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load listings: $e';
-        _isLoading = false;
-      });
     }
   }
 
@@ -178,31 +84,85 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
     ).then((result) {
       if (result == true) {
         // Refresh listings after new listing is added
-        _initializeData();
+        _loadListingsFromFirestore();
       }
     });
   }
 
-  void _handleToggleListing(Listing listing) {
-    setState(() {
-      final index = _listings.indexWhere((l) => l.id == listing.id);
-      if (index != -1) {
-        _listings[index] = _listings[index].toggleStatus();
+  Future<void> _handleToggleListing(Listing listing) async {
+    try {
+      // Optimistically update UI
+      setState(() {
+        final index = _listings.indexWhere((l) => l.id == listing.id);
+        if (index != -1) {
+          _listings[index] = _listings[index].toggleStatus();
+        }
+      });
+
+      // Update status in Firestore
+      final firestoreListing = await _repository.getListingById(listing.id);
+      if (firestoreListing != null) {
+        final updatedListing = firestoreListing.copyWith(
+          status: listing.isActive ? 'inactive' : 'active',
+          updatedAt: DateTime.now(),
+        );
+        await _repository.updateListing(updatedListing);
       }
-    });
-    // TODO: Save to backend
+    } catch (e) {
+      // Revert on error
+      setState(() {
+        final index = _listings.indexWhere((l) => l.id == listing.id);
+        if (index != -1) {
+          _listings[index] = _listings[index].toggleStatus();
+        }
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update status: $e')),
+        );
+      }
+    }
   }
 
-  void _handleEditListing(String id) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${ManageListingsConstants.editListingComingSoon} $id'),
-      ),
-    );
-    // TODO: Navigate to edit listing page
+  void _handleEditListing(String id) async {
+    try {
+      // Fetch the listing from Firestore
+      final firestoreListing = await _repository.getListingById(id);
+      
+      if (firestoreListing == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Listing not found')),
+          );
+        }
+        return;
+      }
+      
+      // Navigate to add listing page in edit mode
+      if (mounted) {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddListingPage(listing: firestoreListing),
+          ),
+        );
+        
+        // Refresh listings if update was successful
+        if (result == true) {
+          _loadListingsFromFirestore();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load listing: $e')),
+        );
+      }
+    }
   }
 
-  void _handleDeleteListing(String id) {
+  Future<void> _handleDeleteListing(String id) async {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -214,15 +174,30 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
             child: const Text(ManageListingsConstants.cancelButtonLabel),
           ),
           TextButton(
-            onPressed: () {
-              setState(() => _listings.removeWhere((l) => l.id == id));
+            onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(ManageListingsConstants.successDeleteMessage),
-                ),
-              );
-              // TODO: Delete from backend
+              
+              try {
+                // Delete from Firestore
+                await _repository.deleteListing(id);
+                
+                // Update UI
+                setState(() => _listings.removeWhere((l) => l.id == id));
+                
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(ManageListingsConstants.successDeleteMessage),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to delete listing: $e')),
+                  );
+                }
+              }
             },
             child: Text(
               ManageListingsConstants.deleteButtonLabel,
@@ -265,7 +240,7 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _loadListings,
+                onPressed: _loadListingsFromFirestore,
                 child: const Text('Retry'),
               ),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/theme/theme.dart';
+import '../../../core/widgets/user_avatar.dart';
 import '../models/models.dart';
 
 class ConversationListItem extends StatelessWidget {
@@ -48,22 +49,13 @@ class ConversationListItem extends StatelessWidget {
         child: Row(
           children: [
             // Avatar
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  conversation.userAvatar,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textWhite,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            UserAvatar(
+              imageUrl: conversation.userAvatar.isNotEmpty 
+                  ? conversation.userAvatar 
+                  : null,
+              displayName: conversation.userName,
+              radius: 28,
+              fontSize: 20,
             ),
             const SizedBox(width: 12),
             // Content

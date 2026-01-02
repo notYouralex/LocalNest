@@ -22,6 +22,7 @@ class ConversationLoadingState extends ConversationState {
 /// Messages loaded state
 class ConversationMessagesLoadedState extends ConversationState {
   final String conversationId;
+  final String otherUserId;
   final String userName;
   final String userAvatar;
   final String listingName;
@@ -30,6 +31,7 @@ class ConversationMessagesLoadedState extends ConversationState {
 
   const ConversationMessagesLoadedState({
     required this.conversationId,
+    this.otherUserId = '',
     required this.userName,
     required this.userAvatar,
     required this.listingName,
@@ -39,6 +41,7 @@ class ConversationMessagesLoadedState extends ConversationState {
 
   ConversationMessagesLoadedState copyWith({
     String? conversationId,
+    String? otherUserId,
     String? userName,
     String? userAvatar,
     String? listingName,
@@ -47,6 +50,7 @@ class ConversationMessagesLoadedState extends ConversationState {
   }) {
     return ConversationMessagesLoadedState(
       conversationId: conversationId ?? this.conversationId,
+      otherUserId: otherUserId ?? this.otherUserId,
       userName: userName ?? this.userName,
       userAvatar: userAvatar ?? this.userAvatar,
       listingName: listingName ?? this.listingName,
@@ -58,6 +62,7 @@ class ConversationMessagesLoadedState extends ConversationState {
   @override
   List<Object?> get props => [
     conversationId,
+    otherUserId,
     userName,
     userAvatar,
     listingName,

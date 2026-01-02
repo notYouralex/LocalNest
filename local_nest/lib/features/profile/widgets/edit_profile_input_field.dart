@@ -8,6 +8,7 @@ class EditProfileInputField extends StatelessWidget {
   final String label;
   final IconData icon;
   final Function(String)? onChanged;
+  final bool readOnly;
 
   const EditProfileInputField({
     super.key,
@@ -15,6 +16,7 @@ class EditProfileInputField extends StatelessWidget {
     required this.label,
     required this.icon,
     this.onChanged,
+    this.readOnly = false,
   });
 
   @override
@@ -32,6 +34,8 @@ class EditProfileInputField extends StatelessWidget {
         TextField(
           controller: controller,
           onChanged: onChanged,
+          readOnly: readOnly,
+          enabled: !readOnly,
           decoration: InputDecoration(
             hintText: label,
             hintStyle: AppTextStyles.inputHint,

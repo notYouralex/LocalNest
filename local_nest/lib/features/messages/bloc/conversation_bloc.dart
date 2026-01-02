@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/models.dart';
@@ -8,6 +9,8 @@ import 'bloc.dart';
 class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final ConversationRepository repository;
   final MessagesRepository messagesRepository;
+  StreamSubscription? _messagesSubscription;
+  String? _otherUserId;
 
   ConversationBloc({
     required this.repository,
@@ -21,9 +24,10 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<PinConversationEvent>(_onPinConversation);
     on<BlockUserEvent>(_onBlockUser);
     on<ReportUserEvent>(_onReportUser);
+    on<MessagesUpdatedEvent>(_onMessagesUpdated);
   }
 
-  /// Load messages for a conversation
+  /// Load messages for a conversation and subscribe to real-time updates
   Future<void> _onLoadMessages(
     LoadConversationMessagesEvent event,
     Emitter<ConversationState> emit,
@@ -33,8 +37,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     try {
       final result = await repository.getConversationWithMessages(event.conversationId);
       
+      _otherUserId = result['otherUserId'] as String?;
+
       emit(ConversationMessagesLoadedState(
         conversationId: event.conversationId,
+        otherUserId: _otherUserId ?? '',
         userName: result['userName'] as String,
         userAvatar: result['userAvatar'] as String,
         listingName: result['listingName'] as String,
@@ -43,9 +50,39 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
       // Mark messages as read
       add(MarkMessagesAsReadEvent(event.conversationId));
+
+      // Subscribe to real-time message updates
+      _messagesSubscription?.cancel();
+      _messagesSubscription = repository.getMessagesStream(event.conversationId).listen(
+        (messages) {
+          add(MessagesUpdatedEvent(messages));
+        },
+        onError: (error) {
+          debugPrint('Error in messages stream: $error');
+        },
+      );
     } catch (e) {
       emit(ConversationErrorState('Failed to load messages: ${e.toString()}'));
     }
+  }
+
+  /// Handle real-time message updates
+  void _onMessagesUpdated(
+    MessagesUpdatedEvent event,
+    Emitter<ConversationState> emit,
+  ) {
+    final currentState = state.asMessagesLoaded;
+    if (currentState == null) return;
+
+    emit(ConversationMessagesLoadedState(
+      conversationId: currentState.conversationId,
+      otherUserId: currentState.otherUserId,
+      userName: currentState.userName,
+      userAvatar: currentState.userAvatar,
+      listingName: currentState.listingName,
+      messages: event.messages.cast<MessageModel>(),
+      safetyReminderDismissed: currentState.safetyReminderDismissed,
+    ));
   }
 
   /// Send a new message
@@ -195,11 +232,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     Emitter<ConversationState> emit,
   ) async {
     try {
-      await repository.blockUser(event.userId);
+      await repository.blockUser(event.conversationId);
       
       emit(ConversationActionSuccessState(
         actionType: 'block',
-        conversationId: '',
+        conversationId: event.conversationId,
       ));
     } catch (e) {
       emit(ConversationErrorState('Failed to block user: ${e.toString()}'));
@@ -212,14 +249,24 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     Emitter<ConversationState> emit,
   ) async {
     try {
-      await repository.reportUser(userId: event.userId, reason: event.reason);
+      await repository.reportUser(
+        conversationId: event.conversationId,
+        reportedUserId: event.reportedUserId,
+        reason: event.reason,
+      );
       
       emit(ConversationActionSuccessState(
         actionType: 'report',
-        conversationId: '',
+        conversationId: event.conversationId,
       ));
     } catch (e) {
       emit(ConversationErrorState('Failed to report user: ${e.toString()}'));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _messagesSubscription?.cancel();
+    return super.close();
   }
 }

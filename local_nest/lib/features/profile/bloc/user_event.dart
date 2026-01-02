@@ -21,6 +21,7 @@ class LoadUserProfileEvent extends UserEvent {
 /// Update user profile
 class UpdateUserProfileEvent extends UserEvent {
   final String userId;
+  final String? email;
   final String? displayName;
   final String? phoneNumber;
   final String? address;
@@ -30,6 +31,7 @@ class UpdateUserProfileEvent extends UserEvent {
 
   const UpdateUserProfileEvent({
     required this.userId,
+    this.email,
     this.displayName,
     this.phoneNumber,
     this.address,
@@ -41,6 +43,7 @@ class UpdateUserProfileEvent extends UserEvent {
   @override
   List<Object?> get props => [
         userId,
+        email,
         displayName,
         phoneNumber,
         address,

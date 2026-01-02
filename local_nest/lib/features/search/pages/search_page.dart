@@ -282,6 +282,10 @@ class _SearchPageState extends State<SearchPage> {
                       return SearchResultsView(
                         results: state.results,
                         query: state.query,
+                        onFavoriteTap: (_) {
+                          // Refresh search results to get updated favorite status
+                          _searchBloc.add(SearchQueryEvent(state.query));
+                        },
                       );
                     }
 

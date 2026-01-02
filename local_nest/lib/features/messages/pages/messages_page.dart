@@ -88,18 +88,19 @@ class _MessagesPageState extends State<MessagesPage> {
                   }
         
                   if (state is MessagesLoadedState) {
+                    // Combine pinned and regular conversations
                     final allConversations = [
                       ...state.pinnedConversations,
                       ...state.conversations,
                     ];
-        
+                    
                     if (allConversations.isEmpty) {
                       return EmptyStateWidget(
-                        title: 'No messages yet',
-                        icon: Icons.mail_outline,
+                        title: 'No Conversations Yet',
+                        subtitle: 'Start a conversation by messaging a landlord from a listing detail page.',
+                        icon: Icons.chat_bubble_outline,
                       );
                     }
-        
                     return _buildConversationsList(allConversations);
                   }
         

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../repositories/repositories.dart';
 import 'bloc.dart';
@@ -5,34 +6,68 @@ import 'bloc.dart';
 /// BLoC for managing messages list
 class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
   final MessagesRepository repository;
+  StreamSubscription? _conversationsSubscription;
 
   MessagesBloc({required this.repository}) : super(const MessagesInitialState()) {
     on<LoadConversationsEvent>(_onLoadConversations);
     on<SearchConversationsEvent>(_onSearchConversations);
     on<RefreshConversationsEvent>(_onRefreshConversations);
+    on<ConversationsUpdatedEvent>(_onConversationsUpdated);
   }
 
-  /// Handle loading conversations
+  /// Handle loading conversations and subscribe to real-time updates
   Future<void> _onLoadConversations(
     LoadConversationsEvent event,
     Emitter<MessagesState> emit,
   ) async {
+    print('📱 MessagesBloc: Loading conversations...');
     emit(const MessagesLoadingState());
 
     try {
       final conversations = await repository.getConversations();
+      print('📱 MessagesBloc: Loaded ${conversations.length} conversations');
       
       // Separate pinned and regular conversations
       final pinned = conversations.where((c) => c.isPinned).toList();
       final regular = conversations.where((c) => !c.isPinned).toList();
+      print('📱 MessagesBloc: Pinned: ${pinned.length}, Regular: ${regular.length}');
 
       emit(MessagesLoadedState(
         conversations: regular,
         pinnedConversations: pinned,
       ));
+
+      // Subscribe to real-time updates
+      _conversationsSubscription?.cancel();
+      print('📱 MessagesBloc: Subscribing to real-time updates...');
+      _conversationsSubscription = repository.getConversationsStream().listen(
+        (conversations) {
+          print('📱 MessagesBloc: Real-time update received: ${conversations.length} conversations');
+          add(ConversationsUpdatedEvent(conversations));
+        },
+        onError: (error) {
+          print('❌ MessagesBloc: Stream error: $error');
+          // Handle error silently, we already have data loaded
+        },
+      );
     } catch (e) {
+      print('❌ MessagesBloc: Error loading conversations: $e');
       emit(MessagesErrorState('Failed to load conversations: ${e.toString()}'));
     }
+  }
+
+  /// Handle real-time conversation updates
+  void _onConversationsUpdated(
+    ConversationsUpdatedEvent event,
+    Emitter<MessagesState> emit,
+  ) {
+    final pinned = event.conversations.where((c) => c.isPinned).toList();
+    final regular = event.conversations.where((c) => !c.isPinned).toList();
+
+    emit(MessagesLoadedState(
+      conversations: regular,
+      pinnedConversations: pinned,
+    ));
   }
 
   /// Handle searching conversations
@@ -47,10 +82,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         return;
       }
 
-      final conversations = await repository.getConversations();
-      final results = conversations
-          .where((c) => c.userName.toLowerCase().contains(event.query.toLowerCase()))
-          .toList();
+      final results = await repository.searchConversations(event.query);
 
       emit(ConversationsSearchState(
         results: results,
@@ -67,5 +99,11 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     Emitter<MessagesState> emit,
   ) async {
     add(const LoadConversationsEvent());
+  }
+
+  @override
+  Future<void> close() {
+    _conversationsSubscription?.cancel();
+    return super.close();
   }
 }

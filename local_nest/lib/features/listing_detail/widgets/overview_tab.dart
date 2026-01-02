@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../../app/theme/theme.dart';
+import '../../../core/widgets/user_avatar.dart';
 import '../constants/constants.dart';
 
 class OverviewTab extends StatelessWidget {
   final String description;
-  final List<String> inclusions;
-  final List<String> houseRules;
   final String landlordName;
-  final bool isLandlordVerified;
+  final String? landlordProfileImageUrl;
 
   const OverviewTab({
     Key? key,
     required this.description,
-    required this.inclusions,
-    required this.houseRules,
     required this.landlordName,
-    required this.isLandlordVerified,
+    this.landlordProfileImageUrl,
   }) : super(key: key);
 
   @override
@@ -25,77 +22,16 @@ class OverviewTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Description
-          _buildSection(
-            title: 'Description',
-            child: Text(
-              description,
-              style: AppTextStyles.bodyMedium,
+          if (description.isNotEmpty) ...[
+            _buildSection(
+              title: 'Description',
+              child: Text(
+                description,
+                style: AppTextStyles.bodyMedium,
+              ),
             ),
-          ),
-          const SizedBox(height: sectionSpacing),
-
-          // Inclusions
-          _buildSection(
-            title: 'Inclusions',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: inclusions
-                  .map(
-                    (inclusion) => Padding(
-                      padding: const EdgeInsets.only(bottom: itemSpacing),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            size: iconSize,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: itemSpacing),
-                          Text(
-                            inclusion,
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-          const SizedBox(height: sectionSpacing),
-
-          // House Rules
-          _buildSection(
-            title: 'House Rules',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: houseRules
-                  .map(
-                    (rule) => Padding(
-                      padding: const EdgeInsets.only(bottom: itemSpacing),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: AppColors.textSecondary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: itemSpacing),
-                          Text(
-                            rule,
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-          const SizedBox(height: sectionSpacing),
+            const SizedBox(height: sectionSpacing),
+          ],
 
           // Landlord Info Card
           Container(
@@ -109,65 +45,20 @@ class OverviewTab extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  width: landlordAvatarSize,
-                  height: landlordAvatarSize,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      landlordName[0].toUpperCase(),
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                UserAvatar(
+                  imageUrl: landlordProfileImageUrl,
+                  displayName: landlordName,
+                  radius: landlordAvatarSize / 2,
+                  fontSize: 20,
                 ),
                 const SizedBox(width: itemSpacing),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            landlordName,
-                            style: AppTextStyles.bodyLarge,
-                          ),
-                          const SizedBox(width: 8),
-                          if (isLandlordVerified)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF06B6D4),
-                                borderRadius:
-                                    BorderRadius.circular(badgeBorderRadius),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.check,
-                                    size: 10,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    'Verified',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
+                      Text(
+                        landlordName,
+                        style: AppTextStyles.bodyLarge,
                       ),
                       const SizedBox(height: 4),
                       Text(

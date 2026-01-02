@@ -1,16 +1,32 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/models.dart';
 import '../../home/models/listing_model.dart';
 import '../../listings/repositories/firestore_listing_repository.dart';
 import '../../listings/extensions/listing_extensions.dart';
+import '../../favorites/services/favorites_service.dart';
 import 'search_repository.dart';
 
 /// Concrete implementation of SearchRepository
 /// Now uses Firestore instead of mock data
 class SearchRepositoryImpl implements SearchRepository {
   final FirestoreListingRepository _firestoreRepo;
+  final FavoritesService _favoritesService;
+  final FirebaseAuth _auth;
 
-  SearchRepositoryImpl({FirestoreListingRepository? firestoreRepo})
-      : _firestoreRepo = firestoreRepo ?? FirestoreListingRepositoryImpl();
+  SearchRepositoryImpl({
+    FirestoreListingRepository? firestoreRepo,
+    FavoritesService? favoritesService,
+    FirebaseAuth? auth,
+  })  : _firestoreRepo = firestoreRepo ?? FirestoreListingRepositoryImpl(),
+        _favoritesService = favoritesService ?? FavoritesServiceImpl(),
+        _auth = auth ?? FirebaseAuth.instance;
+
+  /// Get the current user's favorite IDs
+  Future<List<String>> _getFavoriteIds() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return [];
+    return await _favoritesService.getUserFavoriteIds(userId);
+  }
 
   @override
   Future<List<ListingModel>> searchListings(
@@ -20,10 +36,11 @@ class SearchRepositoryImpl implements SearchRepository {
   }) async {
     try {
       final listings = await _firestoreRepo.getAllActiveListings();
+      final favoriteIds = await _getFavoriteIds();
       
       if (query.isEmpty) {
-        // Return all active listings
-        return listings.map((l) => l.toListingModel()).toList();
+        // Return all active listings with favorite status
+        return listings.map((l) => l.toListingModel(favoriteIds: favoriteIds)).toList();
       }
       
       // Filter by query
@@ -33,7 +50,7 @@ class SearchRepositoryImpl implements SearchRepository {
               listing.propertyName.toLowerCase().contains(lowerQuery) ||
               listing.city.toLowerCase().contains(lowerQuery) ||
               listing.completeAddress.toLowerCase().contains(lowerQuery))
-          .map((listing) => listing.toListingModel())
+          .map((listing) => listing.toListingModel(favoriteIds: favoriteIds))
           .toList();
 
       // TODO: Implement pagination with offset
@@ -58,9 +75,11 @@ class SearchRepositoryImpl implements SearchRepository {
         minRent: filter.minPrice,
         maxRent: filter.maxPrice,
       );
+      
+      final favoriteIds = await _getFavoriteIds();
 
-      // Convert to ListingModel
-      var results = listings.map((l) => l.toListingModel()).toList();
+      // Convert to ListingModel with favorite status
+      var results = listings.map((l) => l.toListingModel(favoriteIds: favoriteIds)).toList();
 
       // Apply additional query filtering if needed
       if (query.isNotEmpty) {

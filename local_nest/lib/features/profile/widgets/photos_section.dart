@@ -60,7 +60,18 @@ class _PhotosSectionState extends State<PhotosSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return BlocListener<AddListingBloc, AddListingState>(
+      listener: (context, state) {
+        if (state is AddListingFormUpdated) {
+          // Load existing photos when form is initialized
+          if (_selectedImages.isEmpty && state.formData.photoUrls.isNotEmpty) {
+            setState(() {
+              _selectedImages = List<String>.from(state.formData.photoUrls);
+            });
+          }
+        }
+      },
+      child: Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
@@ -151,6 +162,7 @@ class _PhotosSectionState extends State<PhotosSection> {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -203,6 +215,9 @@ class _PhotosSectionState extends State<PhotosSection> {
     required String imagePath,
     required VoidCallback onDelete,
   }) {
+    // Check if it's a network URL or local file path
+    final isNetworkImage = imagePath.startsWith('http://') || imagePath.startsWith('https://');
+    
     return Stack(
       children: [
         Container(
@@ -212,10 +227,31 @@ class _PhotosSectionState extends State<PhotosSection> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              File(imagePath),
-              fit: BoxFit.cover,
-            ),
+            child: isNetworkImage
+                ? Image.network(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(Icons.error, color: Colors.red),
+                      );
+                    },
+                  )
+                : Image.file(
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                  ),
           ),
         ),
         Positioned(

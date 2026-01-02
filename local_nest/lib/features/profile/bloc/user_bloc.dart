@@ -45,6 +45,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
 
       final updatedProfile = currentState.userProfile.copyWith(
+        email: event.email ?? currentState.userProfile.email,
         displayName: event.displayName ?? currentState.userProfile.displayName,
         phoneNumber: event.phoneNumber ?? currentState.userProfile.phoneNumber,
         profileImageUrl:
@@ -53,6 +54,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
       await _userRepository.updateUserProfile(updatedProfile);
       emit(UserUpdated(updatedProfile));
+      
+      // Also emit UserLoaded so widgets can rebuild with new data
+      emit(UserLoaded(updatedProfile));
     } catch (e) {
       emit(UserError(e.toString()));
     }

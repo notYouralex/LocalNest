@@ -29,6 +29,10 @@ class Listing extends Equatable {
   // Status
   final String status; // active, inactive
   
+  // Analytics
+  final int views;
+  final int inquiries;
+  
   // Timestamps
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -49,6 +53,8 @@ class Listing extends Equatable {
     required this.genderPreference,
     required this.photoUrls,
     this.status = 'active',
+    this.views = 0,
+    this.inquiries = 0,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -70,6 +76,8 @@ class Listing extends Equatable {
     genderPreference,
     photoUrls,
     status,
+    views,
+    inquiries,
     createdAt,
     updatedAt,
   ];
@@ -93,6 +101,8 @@ class Listing extends Equatable {
       genderPreference: data['genderPreference'] as String? ?? 'Any',
       photoUrls: List<String>.from(data['photoUrls'] ?? []),
       status: data['status'] as String? ?? 'active',
+      views: data['views'] as int? ?? 0,
+      inquiries: data['inquiries'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -115,6 +125,8 @@ class Listing extends Equatable {
       'genderPreference': genderPreference,
       'photoUrls': photoUrls,
       'status': status,
+      'views': views,
+      'inquiries': inquiries,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -137,6 +149,8 @@ class Listing extends Equatable {
     String? genderPreference,
     List<String>? photoUrls,
     String? status,
+    int? views,
+    int? inquiries,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -156,6 +170,8 @@ class Listing extends Equatable {
       genderPreference: genderPreference ?? this.genderPreference,
       photoUrls: photoUrls ?? this.photoUrls,
       status: status ?? this.status,
+      views: views ?? this.views,
+      inquiries: inquiries ?? this.inquiries,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

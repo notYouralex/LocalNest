@@ -1,8 +1,10 @@
 import '../models/models.dart';
+import '../services/messaging_service.dart';
 
 /// Abstract repository for conversation messages
 abstract class ConversationRepository {
   Future<Map<String, dynamic>> getConversationWithMessages(String conversationId);
+  Stream<List<MessageModel>> getMessagesStream(String conversationId);
   Future<MessageModel> sendMessage({
     required String conversationId,
     required String content,
@@ -17,89 +19,49 @@ abstract class ConversationRepository {
     required String messageId,
   });
   Future<void> markConversationAsRead(String conversationId);
-  Future<void> blockUser(String userId);
+  Future<void> blockUser(String conversationId);
   Future<void> reportUser({
-    required String userId,
+    required String conversationId,
+    required String reportedUserId,
     required String reason,
   });
 }
 
-/// Implementation of ConversationRepository
+/// Implementation of ConversationRepository using Firestore
 class ConversationRepositoryImpl implements ConversationRepository {
+  final MessagingService _messagingService;
+
+  ConversationRepositoryImpl({MessagingService? messagingService})
+      : _messagingService = messagingService ?? MessagingService();
+
   @override
   Future<Map<String, dynamic>> getConversationWithMessages(String conversationId) async {
-    // TODO: Implement API call to fetch conversation with messages
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    final messages = [
-      MessageModel(
-        id: '1',
-        conversationId: conversationId,
-        senderId: 'user1',
-        senderName: 'Maria Santos',
-        senderAvatar: 'MS',
-        content: 'Hello! Are you interested in the room?',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 45)),
-        isRead: true,
-      ),
-      MessageModel(
-        id: '2',
-        conversationId: conversationId,
-        senderId: 'currentUser',
-        senderName: 'You',
-        senderAvatar: 'YU',
-        content: 'Yes! Is it still available?',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 40)),
-        isRead: true,
-      ),
-      MessageModel(
-        id: '3',
-        conversationId: conversationId,
-        senderId: 'user1',
-        senderName: 'Maria Santos',
-        senderAvatar: 'MS',
-        content: 'Yes, we still have rooms available!',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-        isRead: true,
-      ),
-      MessageModel(
-        id: '4',
-        conversationId: conversationId,
-        senderId: 'currentUser',
-        senderName: 'You',
-        senderAvatar: 'YU',
-        content: 'Great! Can I schedule a visit?',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 28)),
-        isRead: true,
-      ),
-    ];
+    final details = await _messagingService.getConversationDetails(conversationId);
+    final messages = await _messagingService.getMessages(conversationId);
 
     return {
-      'userName': 'Maria Santos',
-      'userAvatar': 'MS',
-      'listingName': 'Cozy Haven Boarding House',
+      'conversationId': conversationId,
+      'otherUserId': details['otherUserId'],
+      'userName': details['userName'],
+      'userAvatar': details['userAvatar'],
+      'listingName': details['listingName'],
       'messages': messages,
     };
+  }
+
+  @override
+  Stream<List<MessageModel>> getMessagesStream(String conversationId) {
+    return _messagingService.getMessagesStream(conversationId);
   }
 
   @override
   Future<MessageModel> sendMessage({
     required String conversationId,
     required String content,
-  }) async {
-    // TODO: Implement API call to send message
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    return MessageModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+  }) {
+    return _messagingService.sendMessage(
       conversationId: conversationId,
-      senderId: 'currentUser',
-      senderName: 'You',
-      senderAvatar: 'YU',
       content: content,
-      timestamp: DateTime.now(),
-      isRead: true,
-      status: MessageStatus.sent,
     );
   }
 
@@ -108,38 +70,45 @@ class ConversationRepositoryImpl implements ConversationRepository {
     required String conversationId,
     required String messageId,
     required String newContent,
-  }) async {
-    // TODO: Implement API call to edit message
-    await Future.delayed(const Duration(milliseconds: 300));
+  }) {
+    return _messagingService.editMessage(
+      conversationId: conversationId,
+      messageId: messageId,
+      newContent: newContent,
+    );
   }
 
   @override
   Future<void> deleteMessage({
     required String conversationId,
     required String messageId,
-  }) async {
-    // TODO: Implement API call to delete message
-    await Future.delayed(const Duration(milliseconds: 300));
+  }) {
+    return _messagingService.deleteMessage(
+      conversationId: conversationId,
+      messageId: messageId,
+    );
   }
 
   @override
-  Future<void> markConversationAsRead(String conversationId) async {
-    // TODO: Implement API call to mark conversation as read
-    await Future.delayed(const Duration(milliseconds: 200));
+  Future<void> markConversationAsRead(String conversationId) {
+    return _messagingService.markConversationAsRead(conversationId);
   }
 
   @override
-  Future<void> blockUser(String userId) async {
-    // TODO: Implement API call to block user
-    await Future.delayed(const Duration(milliseconds: 300));
+  Future<void> blockUser(String conversationId) {
+    return _messagingService.blockUser(conversationId);
   }
 
   @override
   Future<void> reportUser({
-    required String userId,
+    required String conversationId,
+    required String reportedUserId,
     required String reason,
-  }) async {
-    // TODO: Implement API call to report user
-    await Future.delayed(const Duration(milliseconds: 300));
+  }) {
+    return _messagingService.reportUser(
+      conversationId: conversationId,
+      reportedUserId: reportedUserId,
+      reason: reason,
+    );
   }
 }

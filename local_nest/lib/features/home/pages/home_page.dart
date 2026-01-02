@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _listingBloc = ListingBloc(
       repository: ListingRepositoryImpl(),
-    )..add(const FetchListingsEvent());
+    ); // BLoC automatically starts watching listings
   }
 
   @override
@@ -214,17 +214,21 @@ class _HomePageState extends State<HomePage> {
       itemCount: listings.length,
       itemBuilder: (context, index) {
         final listing = listings[index];
-        return ListingCardWithBloc(
+        return FavoriteListingCard(
           listing: listing,
-          onTap: () {
+          onTap: () async {
             // Navigate to listing detail page with converted model
-            context.push(
-              '/home/listing/${listing.id}',
-              extra: listing.toDetailModel(),
-            );
+            final detailModel = await listing.toDetailModelFromFirestore();
+            if (context.mounted) {
+              context.push(
+                '/home/listing/${listing.id}',
+                extra: detailModel,
+              );
+            }
           },
           onFavoriteChanged: () {
-            // Favorite status changed via BLoC
+            // Refresh the listings to get updated favorite status
+            context.read<ListingBloc>().add(const RefreshListingsEvent());
           },
         );
       },

@@ -4,12 +4,10 @@ import '../constants/constants.dart';
 
 class ImageCarousel extends StatefulWidget {
   final List<String> images;
-  final bool isLandlordVerified;
 
   const ImageCarousel({
     Key? key,
     required this.images,
-    required this.isLandlordVerified,
   }) : super(key: key);
 
   @override
@@ -34,6 +32,8 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+    
     return Stack(
       children: [
         // Image Carousel
@@ -49,6 +49,8 @@ class _ImageCarouselState extends State<ImageCarousel> {
               return Image.network(
                 widget.images[index],
                 fit: BoxFit.cover,
+                width: double.infinity,
+                height: detailHeaderHeight,
               );
             },
           ),
@@ -56,7 +58,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
         // Back Button
         Positioned(
-          top: 12,
+          top: topPadding + 12,
           left: 12,
           child: Container(
             decoration: BoxDecoration(
@@ -88,75 +90,6 @@ class _ImageCarouselState extends State<ImageCarousel> {
           ),
         ),
 
-        // Share & Like Buttons
-        Positioned(
-          top: 12,
-          right: 12,
-          child: Row(
-            children: [
-              // Share Button
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {},
-                    customBorder: const CircleBorder(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Icon(
-                        Icons.share,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Like Button
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {},
-                    customBorder: const CircleBorder(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Icon(
-                        Icons.favorite_border,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
         // Image Counter
         Positioned(
           bottom: 16,
@@ -172,39 +105,6 @@ class _ImageCarouselState extends State<ImageCarousel> {
               style: AppTextStyles.bodySmall.copyWith(
                 color: Colors.white,
               ),
-            ),
-          ),
-        ),
-
-        // Verified Badge
-        Positioned(
-          bottom: 16,
-          left: 12,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981),
-              borderRadius: BorderRadius.circular(badgeBorderRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.check, color: Colors.white, size: 12),
-                const SizedBox(width: 4),
-                Text(
-                  'Verified Landlord',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ],
             ),
           ),
         ),

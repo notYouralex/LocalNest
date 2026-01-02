@@ -7,12 +7,12 @@ class ListingDetail {
   final int slotsAvailable;
   final List<String> images;
   final String description;
-  final List<String> inclusions;
-  final List<String> houseRules;
   final List<String> tags;
+  final String landlordId;
   final String landlordName;
-  final bool isLandlordVerified;
-  final List<NearbyLandmark> nearbyLandmarks;
+  final String? landlordProfileImageUrl;
+  final double? latitude;
+  final double? longitude;
 
   ListingDetail({
     required this.id,
@@ -23,12 +23,12 @@ class ListingDetail {
     required this.slotsAvailable,
     required this.images,
     required this.description,
-    required this.inclusions,
-    required this.houseRules,
     required this.tags,
+    this.landlordId = '',
     required this.landlordName,
-    required this.isLandlordVerified,
-    required this.nearbyLandmarks,
+    this.landlordProfileImageUrl,
+    this.latitude,
+    this.longitude,
   });
 
   factory ListingDetail.fromJson(Map<String, dynamic> json) {
@@ -41,32 +41,14 @@ class ListingDetail {
       slotsAvailable: json['slotsAvailable'] ?? 0,
       images: List<String>.from(json['images'] ?? []),
       description: json['description'] ?? '',
-      inclusions: List<String>.from(json['inclusions'] ?? []),
-      houseRules: List<String>.from(json['houseRules'] ?? []),
       tags: List<String>.from(json['tags'] ?? []),
+      landlordId: json['landlordId'] ?? json['userId'] ?? '',
       landlordName: json['landlordName'] ?? '',
-      isLandlordVerified: json['isLandlordVerified'] ?? false,
-      nearbyLandmarks: (json['nearbyLandmarks'] as List?)
-              ?.map((e) => NearbyLandmark.fromJson(e))
-              .toList() ??
-          [],
+      landlordProfileImageUrl: json['landlordProfileImageUrl'],
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 }
 
-class NearbyLandmark {
-  final String name;
-  final String distance;
 
-  NearbyLandmark({
-    required this.name,
-    required this.distance,
-  });
-
-  factory NearbyLandmark.fromJson(Map<String, dynamic> json) {
-    return NearbyLandmark(
-      name: json['name'] ?? '',
-      distance: json['distance'] ?? '',
-    );
-  }
-}

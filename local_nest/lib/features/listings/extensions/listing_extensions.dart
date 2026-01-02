@@ -5,7 +5,8 @@ import '../models/listing.dart';
 /// Extension to convert Firestore Listing to UI models
 extension ListingToUIExtension on Listing {
   /// Convert to ListingModel for cards (home/search)
-  ListingModel toListingModel() {
+  /// Pass [favoriteIds] to check if this listing is in user's favorites
+  ListingModel toListingModel({List<String> favoriteIds = const []}) {
     return ListingModel(
       id: id,
       title: propertyName,
@@ -14,7 +15,7 @@ extension ListingToUIExtension on Listing {
       imageUrl: photoUrls.isNotEmpty ? photoUrls[0] : '',
       amenities: _extractAmenities(),
       isAvailable: status == 'active' && availableSlots > 0,
-      isFavorite: false, // TODO: Check from favorites service
+      isFavorite: favoriteIds.contains(id),
     );
   }
 
@@ -32,12 +33,9 @@ extension ListingToUIExtension on Listing {
       slotsAvailable: availableSlots,
       images: photoUrls.isNotEmpty ? photoUrls : ['https://via.placeholder.com/440x320'],
       description: description,
-      inclusions: _getDefaultInclusions(),
-      houseRules: _getDefaultHouseRules(),
       tags: _extractTags(),
       landlordName: landlordName ?? 'Property Owner',
-      isLandlordVerified: isLandlordVerified,
-      nearbyLandmarks: [], // TODO: Add to Listing model or fetch separately
+      
     );
   }
 
@@ -75,21 +73,5 @@ extension ListingToUIExtension on Listing {
     return tags;
   }
 
-  /// Default inclusions (TODO: add to Listing model)
-  List<String> _getDefaultInclusions() {
-    return [
-      'Water',
-      'Electricity',
-      'Security',
-    ];
-  }
-
-  /// Default house rules (TODO: add to Listing model)
-  List<String> _getDefaultHouseRules() {
-    return [
-      'Respect quiet hours',
-      'Keep common areas clean',
-      'No illegal activities',
-    ];
-  }
+  
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../home/models/listing_model.dart';
 import '../../home/widgets/listing_card.dart';
+import '../../listing_detail/extensions/listing_model_extension.dart';
 import '../constants/search_constants.dart';
 import '../../../app/theme/theme.dart';
 
@@ -48,11 +49,17 @@ class PopularListingsView extends StatelessWidget {
           padding: const EdgeInsets.only(
             bottom: SearchConstants.itemSpacing,
           ),
-          child: ListingCardWithBloc(
+          child: FavoriteListingCard(
             listing: listing,
-            onTap: () {
-              context.push('/home/listing/${listing.id}');
-              onListingTap?.call();
+            onTap: () async {
+              final detailModel = await listing.toDetailModelFromFirestore();
+              if (context.mounted) {
+                context.push(
+                  '/home/listing/${listing.id}',
+                  extra: detailModel,
+                );
+                onListingTap?.call();
+              }
             },
             onFavoriteChanged: () {
               onFavoriteTap?.call(listing);

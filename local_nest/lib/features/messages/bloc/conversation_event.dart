@@ -74,26 +74,28 @@ class PinConversationEvent extends ConversationEvent {
 
 /// Event to block user
 class BlockUserEvent extends ConversationEvent {
-  final String userId;
+  final String conversationId;
 
-  const BlockUserEvent(this.userId);
+  const BlockUserEvent(this.conversationId);
 
   @override
-  List<Object?> get props => [userId];
+  List<Object?> get props => [conversationId];
 }
 
 /// Event to report user
 class ReportUserEvent extends ConversationEvent {
-  final String userId;
+  final String conversationId;
+  final String reportedUserId;
   final String reason;
 
   const ReportUserEvent({
-    required this.userId,
+    required this.conversationId,
+    required this.reportedUserId,
     required this.reason,
   });
 
   @override
-  List<Object?> get props => [userId, reason];
+  List<Object?> get props => [conversationId, reportedUserId, reason];
 }
 
 /// Event to mark messages as read
@@ -104,4 +106,14 @@ class MarkMessagesAsReadEvent extends ConversationEvent {
 
   @override
   List<Object?> get props => [conversationId];
+}
+
+/// Event when messages are updated from stream
+class MessagesUpdatedEvent extends ConversationEvent {
+  final List messages;
+
+  const MessagesUpdatedEvent(this.messages);
+
+  @override
+  List<Object?> get props => [messages];
 }

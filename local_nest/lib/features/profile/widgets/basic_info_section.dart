@@ -36,7 +36,25 @@ class _BasicInfoSectionState extends State<BasicInfoSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return BlocListener<AddListingBloc, AddListingState>(
+      listener: (context, state) {
+        if (state is AddListingFormUpdated) {
+          // Update controllers with form data if they're empty
+          if (_propertyNameController.text.isEmpty && state.formData.propertyName.isNotEmpty) {
+            _propertyNameController.text = state.formData.propertyName;
+          }
+          if (_addressController.text.isEmpty && state.formData.completeAddress.isNotEmpty) {
+            _addressController.text = state.formData.completeAddress;
+          }
+          if (_cityController.text.isEmpty && state.formData.city.isNotEmpty) {
+            _cityController.text = state.formData.city;
+          }
+          if (_descriptionController.text.isEmpty && state.formData.description.isNotEmpty) {
+            _descriptionController.text = state.formData.description;
+          }
+        }
+      },
+      child: Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
@@ -118,6 +136,7 @@ class _BasicInfoSectionState extends State<BasicInfoSection> {
           ],
         ),
       ),
+    ),
     );
   }
 

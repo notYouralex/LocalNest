@@ -18,6 +18,8 @@ abstract class FirestoreListingRepository {
   });
   Stream<List<Listing>> watchAllActiveListings();
   Stream<List<Listing>> watchLandlordListings(String landlordId);
+  Future<void> incrementViews(String listingId);
+  Future<void> incrementInquiries(String listingId);
 }
 
 /// Firestore implementation of Listing operations
@@ -160,5 +162,27 @@ class FirestoreListingRepositoryImpl implements FirestoreListingRepository {
         .snapshots()
         .map((snapshot) => 
             snapshot.docs.map((doc) => Listing.fromFirestore(doc)).toList());
+  }
+
+  @override
+  Future<void> incrementViews(String listingId) async {
+    try {
+      await _listingsCollection.doc(listingId).update({
+        'views': FieldValue.increment(1),
+      });
+    } catch (e) {
+      throw Exception('Failed to increment views: $e');
+    }
+  }
+
+  @override
+  Future<void> incrementInquiries(String listingId) async {
+    try {
+      await _listingsCollection.doc(listingId).update({
+        'inquiries': FieldValue.increment(1),
+      });
+    } catch (e) {
+      throw Exception('Failed to increment inquiries: $e');
+    }
   }
 }

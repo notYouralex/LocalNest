@@ -6,6 +6,7 @@ import 'app/router/app_router.dart';
 import 'app/theme/app_theme.dart';
 import 'features/authentication/services/auth_service_provider.dart';
 import 'features/authentication/blocs/blocs.dart';
+import 'features/favorites/bloc/favorites_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,8 +34,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AuthBloc()..add(const CheckAuthStatus()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AuthBloc()..add(const CheckAuthStatus()),
+        ),
+        BlocProvider(
+          create: (context) => FavoritesCubit(),
+        ),
+      ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'LocalNest',

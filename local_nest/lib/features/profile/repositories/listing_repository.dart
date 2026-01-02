@@ -77,16 +77,8 @@ class ListingRepositoryImpl implements ListingRepository {
         throw Exception('Listing not found');
       }
       
-      // Check if there are new images to upload
-      List<String> photoUrls = existingListing.photoUrls;
-      final newImagePaths = listingData['newImagePaths'] as List<String>?;
-      if (newImagePaths != null && newImagePaths.isNotEmpty) {
-        final newUrls = await _cloudinaryService.uploadImages(
-          newImagePaths,
-          folder: 'localnest/listings',
-        );
-        photoUrls = [...photoUrls, ...newUrls];
-      }
+      // Use photoUrls from form data (already uploaded URLs)
+      List<String> photoUrls = listingData['photoUrls'] as List<String>? ?? existingListing.photoUrls;
       
       // Update listing
       final updatedListing = existingListing.copyWith(
@@ -101,8 +93,7 @@ class ListingRepositoryImpl implements ListingRepository {
         availableSlots: listingData['availableSlots'] as int?,
         totalSlots: listingData['totalSlots'] as int?,
         genderPreference: listingData['genderPreference'] as String?,
-        photoUrls: listingData['photoUrls'] as List<String>? ?? photoUrls,
-        status: listingData['status'] as String?,
+        photoUrls: photoUrls,
         updatedAt: DateTime.now(),
       );
       

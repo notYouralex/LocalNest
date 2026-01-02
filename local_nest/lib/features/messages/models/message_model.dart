@@ -11,6 +11,7 @@ class MessageModel extends Equatable {
   final DateTime timestamp;
   final bool isRead;
   final MessageStatus status;
+  final bool isEdited;
 
   const MessageModel({
     required this.id,
@@ -22,6 +23,7 @@ class MessageModel extends Equatable {
     required this.timestamp,
     this.isRead = false,
     this.status = MessageStatus.sent,
+    this.isEdited = false,
   });
 
   /// Create a copy with optional field updates
@@ -35,6 +37,7 @@ class MessageModel extends Equatable {
     DateTime? timestamp,
     bool? isRead,
     MessageStatus? status,
+    bool? isEdited,
   }) {
     return MessageModel(
       id: id ?? this.id,
@@ -46,6 +49,7 @@ class MessageModel extends Equatable {
       timestamp: timestamp ?? this.timestamp,
       isRead: isRead ?? this.isRead,
       status: status ?? this.status,
+      isEdited: isEdited ?? this.isEdited,
     );
   }
 
@@ -60,6 +64,7 @@ class MessageModel extends Equatable {
     timestamp,
     isRead,
     status,
+    isEdited,
   ];
 }
 

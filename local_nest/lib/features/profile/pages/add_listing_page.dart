@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../listings/models/listing.dart';
 import '../bloc/add_listing_bloc.dart';
 import '../repositories/listing_repository.dart';
 import '../widgets/basic_info_section.dart';
@@ -17,20 +18,27 @@ import '../widgets/photos_section.dart';
 /// - Delegates data persistence to repository
 /// - Composed of reusable widget sections for maintainability
 class AddListingPage extends StatelessWidget {
-  const AddListingPage({Key? key}) : super(key: key);
+  final Listing? listing; // Optional listing for edit mode
+  
+  const AddListingPage({Key? key, this.listing}) : super(key: key);
+
+  bool get isEditMode => listing != null;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => AddListingBloc(
         listingRepository: ListingRepositoryImpl(),
+        initialListing: listing,
       ),
       child: BlocListener<AddListingBloc, AddListingState>(
         listener: (context, state) {
           if (state is AddListingSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Listing created successfully!'),
+              SnackBar(
+                content: Text(isEditMode 
+                    ? 'Listing updated successfully!' 
+                    : 'Listing created successfully!'),
                 backgroundColor: Colors.green,
               ),
             );
@@ -46,7 +54,7 @@ class AddListingPage extends StatelessWidget {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Add New Listing'),
+            title: Text(isEditMode ? 'Edit Listing' : 'Add New Listing'),
             elevation: 0,
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
@@ -138,7 +146,7 @@ class AddListingPage extends StatelessWidget {
                         )
                       : Center(
                           child: Text(
-                            'Publish Listing',
+                            isEditMode ? 'Update Listing' : 'Publish Listing',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

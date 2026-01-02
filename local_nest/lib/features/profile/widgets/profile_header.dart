@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/theme/theme.dart';
+import '../../../core/widgets/user_avatar.dart';
 import '../constants/profile_constants.dart';
 
 /// Profile header widget with user info and avatar
@@ -7,6 +8,7 @@ class ProfileHeader extends StatelessWidget {
   final String userName;
   final String email;
   final String userType;
+  final String? profileImageUrl;
   final VoidCallback? onEditPressed;
 
   const ProfileHeader({
@@ -14,13 +16,9 @@ class ProfileHeader extends StatelessWidget {
     required this.userName,
     required this.email,
     required this.userType,
+    this.profileImageUrl,
     this.onEditPressed,
   });
-
-  String get _initials {
-    final names = userName.split(' ');
-    return names.map((name) => name[0]).take(2).join().toUpperCase();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,22 +76,11 @@ class ProfileHeader extends StatelessWidget {
           Row(
             children: [
               // Avatar
-              Container(
-                width: ProfileConstants.avatarRadius * 2,
-                height: ProfileConstants.avatarRadius * 2,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    _initials,
-                    style: AppTextStyles.heading1.copyWith(
-                      color: AppColors.primary,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
+              UserAvatar(
+                imageUrl: profileImageUrl,
+                displayName: userName,
+                radius: ProfileConstants.avatarRadius,
+                fontSize: 24,
               ),
               const SizedBox(width: 16),
               // User info

@@ -23,7 +23,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late NotificationSettings _notificationSettings;
   late RenterStats _renterStats;
 
   @override
@@ -40,13 +39,6 @@ class _ProfilePageState extends State<ProfilePage> {
       context.read<UserBloc>().add(LoadUserProfileEvent(currentUser.uid));
     }
 
-    // Initialize notification settings with defaults
-    _notificationSettings = NotificationSettings(
-      newListings: true,
-      messages: true,
-      availability: false,
-    );
-
     // Initialize stats with defaults
     _renterStats = RenterStats(
       favorites: ProfileConstants.defaultFavorites,
@@ -54,18 +46,19 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _handleNotificationSettingsChange(Map<String, bool> settings) {
-    setState(() {
-      _notificationSettings = _notificationSettings.copyWith(
-        newListings: settings['newListings'],
-        messages: settings['messages'],
-        availability: settings['availability'],
-      );
-    });
-    // TODO: Save notification preferences to backend
-  }
-
   void _handleEditProfile() {
+    final userState = context.read<UserBloc>().state;
+    if (userState is! UserLoaded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please wait, loading profile...'),
+        ),
+      );
+      return;
+    }
+
+    final userBloc = context.read<UserBloc>();
+
     showModalBottomSheet(
       useSafeArea: true,
       context: context,
@@ -76,8 +69,19 @@ class _ProfilePageState extends State<ProfilePage> {
           topRight: Radius.circular(ProfileConstants.modalBorderRadius),
         ),
       ),
-      builder: (context) => const EditProfilePage(),
-    );
+      builder: (modalContext) => BlocProvider.value(
+        value: userBloc,
+        child: EditProfilePage(userProfile: userState.userProfile),
+      ),
+    ).then((updated) {
+      if (updated == true) {
+        // Reload user profile after edit
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser != null) {
+          context.read<UserBloc>().add(LoadUserProfileEvent(currentUser.uid));
+        }
+      }
+    });
   }
 
   void _handlePrivacySafety() {
@@ -320,6 +324,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     userName: userProfile.displayName ?? 'User',
                     email: userProfile.email,
                     userType: userProfile.userType.toUpperCase(),
+                    profileImageUrl: userProfile.profileImageUrl,
                     onEditPressed: _handleEditProfile,
                   ),
                   const SizedBox(height: ProfileConstants.sectionSpacing),
@@ -343,19 +348,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   if (userProfile.userType == 'landlord')
                     const SizedBox(height: ProfileConstants.sectionSpacing),
-                  // Notifications section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: ProfileConstants.contentPadding,
-                    ),
-                  child: NotificationsSection(
-                    newListingsEnabled: _notificationSettings.newListings,
-                    messagesEnabled: _notificationSettings.messages,
-                    availabilityEnabled: _notificationSettings.availability,
-                    onSettingsChanged: _handleNotificationSettingsChange,
-                  ),
-                ),
-                const SizedBox(height: ProfileConstants.sectionSpacing),
                 // Settings menu
                 Padding(
                   padding: const EdgeInsets.symmetric(

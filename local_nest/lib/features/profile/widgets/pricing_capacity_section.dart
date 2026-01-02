@@ -36,7 +36,32 @@ class _PricingCapacitySectionState extends State<PricingCapacitySection> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return BlocListener<AddListingBloc, AddListingState>(
+      listener: (context, state) {
+        if (state is AddListingFormUpdated) {
+          // Update controllers and selections with form data
+          if (_rentController.text.isEmpty && state.formData.monthlyRent > 0) {
+            _rentController.text = state.formData.monthlyRent.toString();
+          }
+          if (_availableSlotsController.text.isEmpty && state.formData.availableSlots > 0) {
+            _availableSlotsController.text = state.formData.availableSlots.toString();
+          }
+          if (_totalSlotsController.text.isEmpty && state.formData.totalSlots > 0) {
+            _totalSlotsController.text = state.formData.totalSlots.toString();
+          }
+          if (state.formData.roomType.isNotEmpty && _selectedRoomType != state.formData.roomType) {
+            setState(() {
+              _selectedRoomType = state.formData.roomType;
+            });
+          }
+          if (state.formData.genderPreference.isNotEmpty && _selectedGender != state.formData.genderPreference) {
+            setState(() {
+              _selectedGender = state.formData.genderPreference;
+            });
+          }
+        }
+      },
+      child: Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
@@ -174,6 +199,7 @@ class _PricingCapacitySectionState extends State<PricingCapacitySection> {
           ],
         ),
       ),
+    ),
     );
   }
 
