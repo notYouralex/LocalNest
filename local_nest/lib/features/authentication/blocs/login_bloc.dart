@@ -21,7 +21,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginPasswordChanged>(_onPasswordChanged);
     on<LoginSubmitted>(_onSubmitted);
     on<LoginWithGooglePressed>(_onGooglePressed);
-    on<LoginWithFacebookPressed>(_onFacebookPressed);
   }
 
   void _onEmailChanged(LoginEmailChanged event, Emitter<LoginState> emit) {
@@ -65,10 +64,34 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   Future<void> _onGooglePressed(LoginWithGooglePressed event, Emitter<LoginState> emit) async {
-    // TODO: Implement Google sign in
-  }
+    emit(state.copyWith(status: LoginStatus.loading));
 
-  Future<void> _onFacebookPressed(LoginWithFacebookPressed event, Emitter<LoginState> emit) async {
-    // TODO: Implement Facebook sign in
+    try {
+      // Sign in with Google
+      await _authService.signInWithGoogle();
+
+      // Get the authenticated user
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('Failed to get user ID after Google login');
+      }
+
+      // Fetch user profile from Firestore
+      final userProfile = await _userRepository.getUserProfile(userId);
+      if (userProfile == null) {
+        throw Exception('User profile not found. Please complete registration.');
+      }
+
+      // Emit success with the real userType from Firestore
+      emit(state.copyWith(
+        status: LoginStatus.success,
+        userType: userProfile.userType,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.toString(),
+      ));
+    }
   }
 }

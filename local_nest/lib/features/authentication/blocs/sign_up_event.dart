@@ -70,10 +70,10 @@ class SignUpSubmitted extends SignUpEvent {
 
 /// Event when signing up with Google
 class SignUpWithGooglePressed extends SignUpEvent {
-  const SignUpWithGooglePressed();
-}
+  final String userType;
 
-/// Event when signing up with Facebook
-class SignUpWithFacebookPressed extends SignUpEvent {
-  const SignUpWithFacebookPressed();
+  const SignUpWithGooglePressed(this.userType);
+
+  @override
+  List<Object?> get props => [userType];
 }

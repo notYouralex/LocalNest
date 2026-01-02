@@ -25,7 +25,6 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     on<SignUpTermsToggled>(_onTermsToggled);
     on<SignUpSubmitted>(_onSubmitted);
     on<SignUpWithGooglePressed>(_onGooglePressed);
-    on<SignUpWithFacebookPressed>(_onFacebookPressed);
   }
 
   void _onNameChanged(SignUpNameChanged event, Emitter<SignUpState> emit) {
@@ -95,24 +94,31 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     emit(state.copyWith(status: SignUpStatus.loading));
 
     try {
-      await _authService.signUpWithGoogle();
-      emit(state.copyWith(status: SignUpStatus.success));
-    } catch (e) {
-      emit(state.copyWith(
-        status: SignUpStatus.failure,
-        errorMessage: e.toString(),
-      ));
-    }
-  }
+      final user = await _authService.signUpWithGoogle();
 
-  Future<void> _onFacebookPressed(
-    SignUpWithFacebookPressed event,
-    Emitter<SignUpState> emit,
-  ) async {
-    emit(state.copyWith(status: SignUpStatus.loading));
+      // Get the newly created user
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('Failed to get user ID');
+      }
 
-    try {
-      await _authService.signUpWithFacebook();
+      // Check if user profile already exists (user already signed up before)
+      final existingProfile = await _userRepository.getUserProfile(userId);
+      if (existingProfile != null) {
+        // User already exists - they should use login instead
+        // Sign out to prevent auto-login with wrong expectations
+        await _authService.signOut();
+        throw Exception('Account already exists. Please use Sign In instead.');
+      }
+
+      // Create user profile in Firestore (only for new users)
+      await _userRepository.createUserProfile(
+        userId: userId,
+        email: user.email,
+        userType: event.userType,
+        displayName: user.displayName ?? '',
+      );
+
       emit(state.copyWith(status: SignUpStatus.success));
     } catch (e) {
       emit(state.copyWith(

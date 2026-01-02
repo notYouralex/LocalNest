@@ -1,32 +1,13 @@
 flutter_native_splash:
   # Enable splash screen for all platforms
   android: true
-  ios: true
   web: true
 
-  # Background image
-  background_image: "assets/image/LoadingScreen.png"
-  background_image_dark: "assets/image/LoadingScreen.png"
+  background_image: assets/image/LoadingScreen.png
+  image: assets/image/Icon.png
+  branding: assets/image/branding.png
 
-  # Center logo/image
-  image: "assets/image/Logo.png"
-  
-  # Image alignment (center)
-  android_gravity: center
-  ios_content_mode: center
-  web_image_mode: center
-
-  # Branding (bottom of splash screen)
-  branding: "assets/image/LocalNest.png"
-  branding_dark: "assets/image/LocalNest.png"
-  
-  # Branding position
-  branding_mode: bottom
-
-  # Android 12+ specific settings
   android_12:
-    color: "#0A2533"
-    image: "assets/image/Icon.png"
-    branding: "assets/image/LocalNest.png"
-    icon_background_color: "#FAFAF9"
-
+    image: assets/image/Icon.png
+    color: "#238B45"
+    branding: assets/image/branding.png

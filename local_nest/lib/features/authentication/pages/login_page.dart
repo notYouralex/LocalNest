@@ -195,6 +195,27 @@ class _LoginPageState extends State<LoginPage> {
                         
                         const SizedBox(height: 48),
                         
+                        // Divider with text
+                        const AuthDivider(text: 'or sign in with'),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Social login buttons
+                        BlocBuilder<LoginBloc, LoginState>(
+                          builder: (context, state) {
+                            return GoogleLoginButton(
+                              onPressed: state.status == LoginStatus.loading
+                                  ? null
+                                  : () {
+                                      context.read<LoginBloc>().add(LoginWithGooglePressed());
+                                    },
+                              isLoading: state.status == LoginStatus.loading,
+                            );
+                          },
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
                         // Sign up link
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,

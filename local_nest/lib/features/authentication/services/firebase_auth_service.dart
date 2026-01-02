@@ -49,8 +49,11 @@ class FirebaseLoginAuthService implements LoginAuthService {
         final result = await _firebaseAuth.signInWithPopup(provider);
         return UserModel.fromFirebaseUser(result.user!);
       } else {
+        // Sign out first to force account picker to show
+        await _googleSignIn!.signOut();
+        
         // For mobile
-        final googleUser = await _googleSignIn!.signIn();
+        final googleUser = await _googleSignIn.signIn();
         if (googleUser == null) {
           throw AuthException(
             code: 'google-sign-in-cancelled',

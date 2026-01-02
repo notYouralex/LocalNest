@@ -52,6 +52,10 @@ class FirebaseSignUpAuthService implements SignUpAuthService {
           message: 'Google sign-up is not available on this platform',
         );
       }
+      
+      // Sign out first to force account picker to show
+      await _googleSignIn.signOut();
+      
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw AuthException(

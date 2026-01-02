@@ -254,15 +254,10 @@ class _SignUpPageState extends State<SignUpPage> {
                         const SizedBox(height: 24),
 
                         // Social login buttons
-                        SocialLoginRow(
-                          onGooglePressed: () {
+                        GoogleLoginButton(
+                          onPressed: () {
                             context.read<SignUpBloc>().add(
-                                  const SignUpWithGooglePressed(),
-                                );
-                          },
-                          onFacebookPressed: () {
-                            context.read<SignUpBloc>().add(
-                                  const SignUpWithFacebookPressed(),
+                                  SignUpWithGooglePressed(widget.userType),
                                 );
                           },
                         ),
