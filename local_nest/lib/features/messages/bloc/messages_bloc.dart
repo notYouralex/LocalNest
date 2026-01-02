@@ -20,17 +20,14 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     LoadConversationsEvent event,
     Emitter<MessagesState> emit,
   ) async {
-    print('📱 MessagesBloc: Loading conversations...');
     emit(const MessagesLoadingState());
 
     try {
       final conversations = await repository.getConversations();
-      print('📱 MessagesBloc: Loaded ${conversations.length} conversations');
       
       // Separate pinned and regular conversations
       final pinned = conversations.where((c) => c.isPinned).toList();
       final regular = conversations.where((c) => !c.isPinned).toList();
-      print('📱 MessagesBloc: Pinned: ${pinned.length}, Regular: ${regular.length}');
 
       emit(MessagesLoadedState(
         conversations: regular,
@@ -39,19 +36,15 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
 
       // Subscribe to real-time updates
       _conversationsSubscription?.cancel();
-      print('📱 MessagesBloc: Subscribing to real-time updates...');
       _conversationsSubscription = repository.getConversationsStream().listen(
         (conversations) {
-          print('📱 MessagesBloc: Real-time update received: ${conversations.length} conversations');
           add(ConversationsUpdatedEvent(conversations));
         },
         onError: (error) {
-          print('❌ MessagesBloc: Stream error: $error');
           // Handle error silently, we already have data loaded
         },
       );
     } catch (e) {
-      print('❌ MessagesBloc: Error loading conversations: $e');
       emit(MessagesErrorState('Failed to load conversations: ${e.toString()}'));
     }
   }

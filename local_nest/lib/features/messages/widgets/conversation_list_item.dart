@@ -41,7 +41,7 @@ class ConversationListItem extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: AppColors.textSecondary.withOpacity(0.1),
+              color: AppColors.textSecondary.withValues(alpha: 0.1),
               width: 0.5,
             ),
           ),

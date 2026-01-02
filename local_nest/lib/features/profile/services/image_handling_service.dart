@@ -1,5 +1,6 @@
 /// Image Handling Service
 /// Single responsibility: Handle all image-related operations
+library;
 import 'package:image_picker/image_picker.dart';
 
 class ImageHandlingService {

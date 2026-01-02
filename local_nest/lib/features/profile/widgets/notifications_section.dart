@@ -167,8 +167,8 @@ class _NotificationItem extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.primary,
-            activeTrackColor: AppColors.primary.withOpacity(0.3),
+            activeThumbColor: AppColors.primary,
+            activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
           ),
         ],
       ),

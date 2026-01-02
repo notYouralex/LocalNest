@@ -76,7 +76,8 @@ class ListingFormData {
     if (availableSlots < 0) return 'Available slots cannot be negative';
     if (totalSlots <= 0) return 'Total slots must be greater than 0';
     if (availableSlots > totalSlots) return 'Available slots cannot exceed total slots';
-    if (photoUrls.length < 2) return 'At least 2 photos are required';
+    if (photoUrls.isEmpty) return 'Please add at least 2 photos of your property';
+    if (photoUrls.length < 2) return 'At least 2 photos are required to publish your listing';
     if (photoUrls.length > 3) return 'Maximum 3 photos allowed';
     return null;
   }

@@ -185,4 +185,19 @@ class SearchRepositoryImpl implements SearchRepository {
       return {'min': 1000.0, 'max': 50000.0};
     }
   }
+
+  @override
+  Stream<List<ListingModel>> watchActiveListings() async* {
+    try {
+      await for (final listings in _firestoreRepo.watchAllActiveListings()) {
+        final favoriteIds = await _getFavoriteIds();
+        final listingModels = listings
+            .map((l) => l.toListingModel(favoriteIds: favoriteIds))
+            .toList();
+        yield listingModels;
+      }
+    } catch (e) {
+      throw Exception('Failed to watch listings: $e');
+    }
+  }
 }

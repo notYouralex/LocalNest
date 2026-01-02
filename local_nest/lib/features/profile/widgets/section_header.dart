@@ -7,11 +7,11 @@ class SectionHeader extends StatelessWidget {
   final String description;
 
   const SectionHeader({
-    Key? key,
+    super.key,
     required this.step,
     required this.title,
     required this.description,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

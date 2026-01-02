@@ -564,12 +564,12 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
   List<BoxShadow> _buildButtonShadow() {
     return [
       BoxShadow(
-        color: _selectedColorStart.withOpacity(0.3),
+        color: _selectedColorStart.withValues(alpha: 0.3),
         blurRadius: 15,
         offset: const Offset(0, 10),
       ),
       BoxShadow(
-        color: _selectedColorStart.withOpacity(0.3),
+        color: _selectedColorStart.withValues(alpha: 0.3),
         blurRadius: 6,
         offset: const Offset(0, 4),
       ),

@@ -33,7 +33,7 @@ class DateSeparator extends StatelessWidget {
         children: [
           Expanded(
             child: Divider(
-              color: AppColors.textSecondary.withOpacity(0.2),
+              color: AppColors.textSecondary.withValues(alpha: 0.2),
             ),
           ),
           Padding(
@@ -48,7 +48,7 @@ class DateSeparator extends StatelessWidget {
           ),
           Expanded(
             child: Divider(
-              color: AppColors.textSecondary.withOpacity(0.2),
+              color: AppColors.textSecondary.withValues(alpha: 0.2),
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 /// Authentication widgets exports
+library;
 export 'intro_header.dart';
 export 'intro_content.dart';
 export 'feature_chip.dart';

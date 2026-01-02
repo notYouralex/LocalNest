@@ -17,20 +17,25 @@ class AuthException implements Exception {
     if (e != null && e.code != null) {
       switch (e.code) {
         case 'user-not-found':
-          message = 'User not found';
-          details = 'No user exists with this email address';
+          message = 'Account not found';
+          details = 'No account exists with this email address. Please sign up first.';
           break;
         case 'wrong-password':
-          message = 'Wrong password';
-          details = 'The password is incorrect';
+          message = 'Incorrect password';
+          details = 'The password you entered is incorrect';
           break;
-        case 'email-already-in-use':
-          message = 'Email already registered';
-          details = 'An account with this email already exists';
+        case 'invalid-credential':
+          // Firebase SDK v5.x uses this code for wrong email/password
+          message = 'Invalid email or password';
+          details = 'Please check your email and password and try again';
           break;
         case 'invalid-email':
           message = 'Invalid email';
           details = 'Please enter a valid email address';
+          break;
+        case 'email-already-in-use':
+          message = 'Email already registered';
+          details = 'An account with this email already exists. Please sign in instead.';
           break;
         case 'weak-password':
           message = 'Weak password';
@@ -42,11 +47,19 @@ class AuthException implements Exception {
           break;
         case 'too-many-requests':
           message = 'Too many attempts';
-          details = 'Please try again later';
+          details = 'Account temporarily locked. Please try again later.';
           break;
         case 'user-disabled':
           message = 'Account disabled';
-          details = 'This account has been disabled';
+          details = 'This account has been disabled. Please contact support.';
+          break;
+        case 'operation-not-allowed':
+          message = 'Sign in method not allowed';
+          details = 'This sign in method is not enabled';
+          break;
+        case 'account-exists-with-different-credential':
+          message = 'Account exists with different method';
+          details = 'An account already exists with the same email but different sign-in credentials';
           break;
         default:
           message = 'Authentication error';

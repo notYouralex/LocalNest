@@ -13,10 +13,10 @@ class ListingCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const ListingCard({
-    Key? key,
+    super.key,
     required this.listing,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class ListingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -87,7 +87,7 @@ class ListingCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 6,
                   offset: const Offset(0, 1),
                 ),
@@ -130,7 +130,7 @@ class ListingCard extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 1),
             ),
@@ -275,11 +275,11 @@ class ListingCardWithBloc extends StatelessWidget {
   final VoidCallback? onFavoriteChanged;
 
   const ListingCardWithBloc({
-    Key? key,
+    super.key,
     required this.listing,
     this.onTap,
     this.onFavoriteChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +291,7 @@ class ListingCardWithBloc extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -350,7 +350,7 @@ class ListingCardWithBloc extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 6,
                   offset: const Offset(0, 1),
                 ),
@@ -394,7 +394,7 @@ class ListingCardWithBloc extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 1),
               ),
@@ -540,11 +540,11 @@ class FavoriteListingCard extends StatelessWidget {
   final VoidCallback? onFavoriteChanged;
 
   const FavoriteListingCard({
-    Key? key,
+    super.key,
     required this.listing,
     this.onTap,
     this.onFavoriteChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -560,7 +560,7 @@ class FavoriteListingCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -656,7 +656,7 @@ class FavoriteListingCard extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 1),
               ),

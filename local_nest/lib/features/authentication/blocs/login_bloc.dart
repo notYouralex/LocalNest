@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/services.dart';
+import '../models/models.dart';
 import '../../profile/repositories/firestore_user_repository.dart';
 
 part 'login_event.dart';
@@ -55,10 +56,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         status: LoginStatus.success,
         userType: userProfile.userType,
       ));
+    } on AuthException catch (e) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Login failed. Please try again.',
       ));
     }
   }
@@ -87,10 +93,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         status: LoginStatus.success,
         userType: userProfile.userType,
       ));
+    } on AuthException catch (e) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Google login failed. Please try again.',
       ));
     }
   }

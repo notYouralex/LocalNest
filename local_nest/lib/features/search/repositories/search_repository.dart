@@ -27,4 +27,7 @@ abstract class SearchRepository {
 
   /// Get price range for filtering
   Future<Map<String, double>> getPriceRange();
+
+  /// Watch active listings stream for real-time updates
+  Stream<List<ListingModel>> watchActiveListings();
 }

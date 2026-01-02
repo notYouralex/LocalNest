@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/models.dart';
 import 'sign_up_auth.dart';
@@ -9,15 +8,12 @@ import 'sign_up_auth.dart';
 class FirebaseSignUpAuthService implements SignUpAuthService {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn? _googleSignIn;
-  final FacebookAuth _facebookAuth;
 
   FirebaseSignUpAuthService({
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
-    FacebookAuth? facebookAuth,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = kIsWeb ? null : (googleSignIn ?? GoogleSignIn()),
-        _facebookAuth = facebookAuth ?? FacebookAuth.instance;
+        _googleSignIn = kIsWeb ? null : (googleSignIn ?? GoogleSignIn());
 
   @override
   Future<UserModel> signUpWithEmail(String name, String email, String password) async {
@@ -90,51 +86,10 @@ class FirebaseSignUpAuthService implements SignUpAuthService {
   }
 
   @override
-  Future<UserModel> signUpWithFacebook() async {
-    try {
-      final result = await _facebookAuth.login();
-
-      if (result.status == LoginStatus.cancelled) {
-        throw AuthException(
-          code: 'facebook-sign-up-cancelled',
-          message: 'Facebook sign-up was cancelled',
-        );
-      }
-
-      if (result.status == LoginStatus.failed) {
-        throw AuthException(
-          code: 'facebook-sign-up-error',
-          message: 'Facebook sign-up failed',
-          details: result.message,
-        );
-      }
-
-      final credential = FacebookAuthProvider.credential(result.accessToken!.tokenString);
-      final authResult = await _firebaseAuth.signInWithCredential(credential);
-
-      // If new user, set additional data if needed
-      if (authResult.additionalUserInfo?.isNewUser ?? false) {
-        await authResult.user?.updateDisplayName(authResult.additionalUserInfo?.profile?['name']);
-      }
-
-      return UserModel.fromFirebaseUser(authResult.user!);
-    } on FirebaseAuthException catch (e) {
-      throw AuthException.fromFirebaseAuthException(e);
-    } catch (e) {
-      throw AuthException(
-        code: 'facebook-sign-up-error',
-        message: 'Facebook sign-up failed',
-        details: e.toString(),
-      );
-    }
-  }
-
-  @override
   Future<void> signOut() async {
     try {
-      final futures = [
+      final futures = <Future<void>>[
         _firebaseAuth.signOut(),
-        _facebookAuth.logOut(),
       ];
       if (_googleSignIn != null) {
         futures.add(_googleSignIn.signOut());

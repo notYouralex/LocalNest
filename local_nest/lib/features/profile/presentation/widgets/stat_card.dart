@@ -7,12 +7,15 @@ class StatCard extends StatelessWidget {
   final String label;
   final IconData icon;
   final Color backgroundColor;
+  final bool isLoading;
 
   const StatCard({
+    super.key,
     required this.count,
     required this.label,
     required this.icon,
     required this.backgroundColor,
+    this.isLoading = false,
   });
 
   @override
@@ -33,7 +36,7 @@ class StatCard extends StatelessWidget {
             width: ProfileConstants.largeIconSize * 2,
             height: ProfileConstants.largeIconSize * 2,
             decoration: BoxDecoration(
-              color: backgroundColor.withOpacity(0.2),
+              color: backgroundColor.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -43,13 +46,22 @@ class StatCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            count.toString(),
-            style: AppTextStyles.heading2.copyWith(
-              fontSize: ProfileConstants.largeFontSize,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          isLoading
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.textSecondary,
+                  ),
+                )
+              : Text(
+                  count.toString(),
+                  style: AppTextStyles.heading2.copyWith(
+                    fontSize: ProfileConstants.largeFontSize,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
           const SizedBox(height: 8),
           Text(
             label,

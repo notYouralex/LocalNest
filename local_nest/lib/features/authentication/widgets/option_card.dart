@@ -36,12 +36,12 @@ class _OptionCardState extends State<OptionCard> {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: widget.option.borderColor.withOpacity(0.2),
+              color: widget.option.borderColor.withValues(alpha: 0.2),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -142,7 +142,7 @@ class _OptionButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: option.isOutline
-                ? BorderSide(color: option.borderColor.withOpacity(0.2))
+                ? BorderSide(color: option.borderColor.withValues(alpha: 0.2))
                 : BorderSide.none,
           ),
         ),

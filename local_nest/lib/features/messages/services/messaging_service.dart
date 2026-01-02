@@ -57,11 +57,9 @@ class MessagingService {
                                     otherUserData['profileImageUrl'] as String? ?? 
                                     '';
     
-    print('🔍 Role check - Current user: $currentUserRole, Other user: $otherUserRole');
-    
     // If roles are not set in database, allow messaging (backward compatibility)
     if (currentUserRole.isEmpty || otherUserRole.isEmpty) {
-      print('⚠️ Roles not set in database - allowing conversation');
+      // Roles not set - allowing conversation for backward compatibility
     } else {
       // Validate that one is renter and one is landlord
       final isValidCombination = 
@@ -69,15 +67,12 @@ class MessagingService {
         (currentUserRole == 'landlord' && otherUserRole == 'renter');
       
       if (!isValidCombination) {
-        print('❌ Invalid role combination - Current: "$currentUserRole", Other: "$otherUserRole"');
         if (currentUserRole == otherUserRole) {
           throw Exception('You can only message between renters and landlords');
         } else {
           throw Exception('Invalid user roles for messaging. Your role: "$currentUserRole", Other role: "$otherUserRole"');
         }
       }
-      
-      print('✅ Valid role combination - Creating conversation');
     }
 
     // Create a consistent conversation ID (sorted user IDs)
@@ -125,9 +120,8 @@ class MessagingService {
       if (listingId != null && listingId.isNotEmpty) {
         try {
           await _listingRepository.incrementInquiries(listingId);
-          print('✅ Tracked inquiry for listing: $listingId');
         } catch (e) {
-          print('⚠️ Failed to track inquiry: $e');
+          // Silently ignore inquiry tracking failure
         }
       }
     }
@@ -135,27 +129,51 @@ class MessagingService {
     return conversationId;
   }
 
+  /// Get count of conversations for current user (simple query without ordering)
+  Future<int> getConversationsCount() async {
+    final userId = currentUserId;
+    if (userId == null) return 0;
+
+    try {
+      final snapshot = await _firestore
+          .collection('conversations')
+          .where('participants', arrayContains: userId)
+          .get();
+      return snapshot.docs.length;
+    } catch (e) {
+      // Silently ignore
+      return 0;
+    }
+  }
+
+  /// Watch conversations count in real-time
+  Stream<int> watchConversationsCount() {
+    final userId = currentUserId;
+    if (userId == null) return Stream.value(0);
+
+    return _firestore
+        .collection('conversations')
+        .where('participants', arrayContains: userId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
+
   /// Get stream of conversations for current user
   Stream<List<ConversationModel>> getConversationsStream() {
     final userId = currentUserId;
-    print('🔍 MessagingService: Current user ID: $userId');
     if (userId == null) {
-      print('❌ MessagingService: No user logged in');
       return Stream.value([]);
     }
 
-    print('📡 MessagingService: Setting up conversations stream for user: $userId');
     return _firestore
         .collection('conversations')
         .where('participants', arrayContains: userId)
         .orderBy('lastMessageTime', descending: true)
         .snapshots()
         .asyncMap((snapshot) async {
-      print('📥 MessagingService: Received ${snapshot.docs.length} conversation documents');
       final conversations = <ConversationModel>[];
       
       for (final doc in snapshot.docs) {
-        print('  - Processing conversation: ${doc.id}');
         final conv = _conversationFromFirestore(doc, userId);
         if (conv != null) {
           // Fetch latest avatar from user document if stored avatar is empty
@@ -168,7 +186,6 @@ class MessagingService {
         }
       }
       
-      print('✅ MessagingService: Returning ${conversations.length} conversations');
       return conversations;
     });
   }
@@ -185,7 +202,7 @@ class MessagingService {
         }
       }
     } catch (e) {
-      print('⚠️ Error fetching user avatar: $e');
+      // Silently ignore avatar fetch error
     }
     return conv;
   }
@@ -222,20 +239,17 @@ class MessagingService {
   ConversationModel? _conversationFromFirestore(DocumentSnapshot doc, String currentUserId) {
     final data = doc.data() as Map<String, dynamic>?;
     if (data == null) {
-      print('    ⚠️  Conversation ${doc.id}: No data');
       return null;
     }
 
     // Check if blocked
     final blockedBy = List<String>.from(data['blockedBy'] ?? []);
     if (blockedBy.contains(currentUserId)) {
-      print('    ⚠️  Conversation ${doc.id}: Blocked by current user');
       return null;
     }
 
     // Get other user's info
     final participants = List<String>.from(data['participants'] ?? []);
-    print('    📋 Conversation ${doc.id}: Participants: $participants');
     final otherUserId = participants.firstWhere(
       (id) => id != currentUserId,
       orElse: () => '',
@@ -261,7 +275,6 @@ class MessagingService {
       unreadCount: (unreadCount[currentUserId] as num?)?.toInt() ?? 0,
       isPinned: pinnedBy.contains(currentUserId),
     );
-    print('    ✅ Conversation ${doc.id}: Created model for ${conversation.userName}');
     return conversation;
   }
 
@@ -660,7 +673,7 @@ class MessagingService {
           userAvatar = userDoc.data()?['profileImageUrl'] as String? ?? '';
         }
       } catch (e) {
-        print('⚠️ Error fetching user avatar: $e');
+        // Silently ignore avatar fetch error
       }
     }
 

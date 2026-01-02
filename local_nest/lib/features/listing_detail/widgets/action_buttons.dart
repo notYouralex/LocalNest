@@ -11,12 +11,12 @@ class ActionButtons extends StatelessWidget {
   final String? landlordName;
 
   const ActionButtons({
-    Key? key,
+    super.key,
     this.listingId,
     this.listingTitle,
     this.landlordId,
     this.landlordName,
-  }) : super(key: key);
+  });
 
   Future<void> _handleMessage(BuildContext context) async {
     if (landlordId == null || landlordId!.isEmpty) {

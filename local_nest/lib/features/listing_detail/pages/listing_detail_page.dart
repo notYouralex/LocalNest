@@ -9,9 +9,9 @@ class ListingDetailPage extends StatefulWidget {
   final ListingDetail listing;
 
   const ListingDetailPage({
-    Key? key,
+    super.key,
     required this.listing,
-  }) : super(key: key);
+  });
 
   @override
   State<ListingDetailPage> createState() => _ListingDetailPageState();
@@ -36,7 +36,6 @@ class _ListingDetailPageState extends State<ListingDetailPage>
       await _repository.incrementViews(widget.listing.id);
     } catch (e) {
       // Silently fail - don't interrupt user experience
-      print('Failed to track view: $e');
     }
   }
 

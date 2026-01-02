@@ -379,7 +379,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         borderRadius: BorderRadius.circular(
                           EditProfileModalStyle.buttonBorderRadius,
                         ),
-                        color: AppColors.primary.withOpacity(0.5),
+                        color: AppColors.primary.withValues(alpha: 0.5),
                       )
                     : BoxDecoration(
                         gradient: const LinearGradient(

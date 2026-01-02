@@ -8,9 +8,6 @@ abstract class LoginAuthService {
   /// Sign in with Google
   Future<UserModel> signInWithGoogle();
 
-  /// Sign in with Facebook
-  Future<UserModel> signInWithFacebook();
-
   /// Sign out
   Future<void> signOut();
 

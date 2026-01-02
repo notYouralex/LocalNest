@@ -8,9 +8,6 @@ abstract class SignUpAuthService {
   /// Sign up with Google
   Future<UserModel> signUpWithGoogle();
 
-  /// Sign up with Facebook
-  Future<UserModel> signUpWithFacebook();
-
   /// Sign out
   Future<void> signOut();
 }

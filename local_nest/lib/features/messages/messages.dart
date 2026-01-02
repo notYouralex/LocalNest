@@ -1,4 +1,5 @@
 /// Messages feature barrel file
+library;
 export 'bloc/bloc.dart';
 export 'constants/messages_constants.dart';
 export 'models/models.dart';

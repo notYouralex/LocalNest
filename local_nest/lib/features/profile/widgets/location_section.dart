@@ -7,7 +7,7 @@ import 'package:latlong2/latlong.dart';
 import '../bloc/add_listing_bloc.dart';
 
 class LocationSection extends StatefulWidget {
-  const LocationSection({Key? key}) : super(key: key);
+  const LocationSection({super.key});
 
   @override
   State<LocationSection> createState() => _LocationSectionState();

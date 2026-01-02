@@ -32,7 +32,7 @@ class ProfileHeader extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -56,8 +56,8 @@ class ProfileHeader extends StatelessWidget {
               Ink(
                 child: InkWell(
                   onTap: onEditPressed,
-                  splashColor: AppColors.textWhite.withOpacity(0.2),
-                  highlightColor: AppColors.textWhite.withOpacity(0.1),
+                  splashColor: AppColors.textWhite.withValues(alpha: 0.2),
+                  highlightColor: AppColors.textWhite.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(24),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -110,7 +110,7 @@ class ProfileHeader extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.textWhite.withOpacity(0.2),
+                        color: AppColors.textWhite.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(

@@ -54,7 +54,7 @@ class SearchBarWidget extends StatelessWidget {
                   child: SvgPicture.asset(
                     'assets/icons/search_notclicked.svg',
                     fit: BoxFit.scaleDown,
-                    color: AppColors.textSecondary,
+                    colorFilter: ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn),
                   ),
                 ),
                 suffixIcon: _buildSuffixIcon(),
@@ -107,7 +107,7 @@ class SearchBarWidget extends StatelessWidget {
               SvgPicture.asset(
                 'assets/icons/filter.svg',
                 fit: BoxFit.scaleDown,
-                color: AppColors.textSecondary,
+                colorFilter: ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn),
               ),
               if (isFilterActive)
                 Positioned(

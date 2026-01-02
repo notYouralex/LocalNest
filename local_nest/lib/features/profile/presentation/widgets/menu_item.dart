@@ -8,7 +8,7 @@ class MenuItem extends StatelessWidget {
   final VoidCallback onTap;
   final bool showDivider;
 
-  const MenuItem({
+  const MenuItem({super.key, 
     required this.icon,
     required this.label,
     required this.onTap,

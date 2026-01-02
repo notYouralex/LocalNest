@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_nest/app/theme/app_colors.dart';
 import '../../listings/models/listing.dart';
 import '../bloc/add_listing_bloc.dart';
 import '../repositories/listing_repository.dart';
@@ -10,7 +11,7 @@ import '../widgets/pricing_capacity_section.dart';
 import '../widgets/photos_section.dart';
 
 /// AddListingPage - Main page for creating new property listings
-/// 
+///
 /// This page follows Clean Architecture principles:
 /// - Uses BLoC for state management
 /// - Delegates form logic to BLoC
@@ -19,8 +20,8 @@ import '../widgets/photos_section.dart';
 /// - Composed of reusable widget sections for maintainability
 class AddListingPage extends StatelessWidget {
   final Listing? listing; // Optional listing for edit mode
-  
-  const AddListingPage({Key? key, this.listing}) : super(key: key);
+
+  const AddListingPage({super.key, this.listing});
 
   bool get isEditMode => listing != null;
 
@@ -36,9 +37,11 @@ class AddListingPage extends StatelessWidget {
           if (state is AddListingSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(isEditMode 
-                    ? 'Listing updated successfully!' 
-                    : 'Listing created successfully!'),
+                content: Text(
+                  isEditMode
+                      ? 'Listing updated successfully!'
+                      : 'Listing created successfully!',
+                ),
                 backgroundColor: Colors.green,
               ),
             );
@@ -54,10 +57,19 @@ class AddListingPage extends StatelessWidget {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: Text(isEditMode ? 'Edit Listing' : 'Add New Listing'),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: AppColors.primaryGradient,
+                ),
+              ),
+            ),
+            title: Text(isEditMode ? 'Edit Listing' : 'Add New Listing',style: TextStyle(color: Colors.white),),
             elevation: 0,
+            foregroundColor: Colors.white,
             backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.pop(context),
@@ -92,7 +104,7 @@ class AddListingPage extends StatelessWidget {
 
   Widget _buildSubmitButton(BuildContext context, AddListingState state) {
     final isLoading = state is AddListingLoading;
-    
+
     return Row(
       children: [
         Expanded(
@@ -131,7 +143,9 @@ class AddListingPage extends StatelessWidget {
               child: InkWell(
                 onTap: isLoading
                     ? null
-                    : () => context.read<AddListingBloc>().add(const ListingSubmitted()),
+                    : () => context.read<AddListingBloc>().add(
+                        const ListingSubmitted(),
+                      ),
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -141,7 +155,9 @@ class AddListingPage extends StatelessWidget {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Center(

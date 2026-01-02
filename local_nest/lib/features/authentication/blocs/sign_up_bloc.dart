@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/services.dart';
+import '../models/models.dart';
 import '../../profile/repositories/firestore_user_repository.dart';
 
 part 'sign_up_event.dart';
@@ -79,10 +80,15 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       );
 
       emit(state.copyWith(status: SignUpStatus.success));
+    } on AuthException catch (e) {
+      emit(state.copyWith(
+        status: SignUpStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: SignUpStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Sign up failed. Please try again.',
       ));
     }
   }
@@ -120,10 +126,15 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       );
 
       emit(state.copyWith(status: SignUpStatus.success));
+    } on AuthException catch (e) {
+      emit(state.copyWith(
+        status: SignUpStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: SignUpStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Google sign up failed. Please try again.',
       ));
     }
   }

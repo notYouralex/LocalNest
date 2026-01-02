@@ -9,11 +9,11 @@ class OverviewTab extends StatelessWidget {
   final String? landlordProfileImageUrl;
 
   const OverviewTab({
-    Key? key,
+    super.key,
     required this.description,
     required this.landlordName,
     this.landlordProfileImageUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

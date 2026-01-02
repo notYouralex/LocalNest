@@ -35,7 +35,7 @@ extension ListingModelToDetailExtension on ListingModel {
             landlordProfileImageUrl = landlordData['profileImageUrl'] as String?;
           }
         } catch (e) {
-          print('Error fetching landlord: $e');
+          // Silently ignore landlord fetch error
         }
       }
       
@@ -72,7 +72,7 @@ extension ListingModelToDetailExtension on ListingModel {
         longitude: (data['longitude'] as num?)?.toDouble(),
       );
     } catch (e) {
-      print('Error converting to detail model: $e');
+      // Silently ignore - return basic detail as fallback
       return _createBasicDetail();
     }
   }

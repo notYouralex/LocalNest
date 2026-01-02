@@ -10,13 +10,13 @@ class ListingDetailHeader extends StatelessWidget {
   final List<String> tags;
 
   const ListingDetailHeader({
-    Key? key,
+    super.key,
     required this.title,
     required this.address,
     required this.price,
     required this.slotsAvailable,
     required this.tags,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

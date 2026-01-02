@@ -60,7 +60,7 @@ class IntroContent extends StatelessWidget {
             
             // Footer text
             Text(
-              'You can change your account type anytime',
+              'You cannot change this later.',
               style: AppTextStyles.bodySmall,
             ),
           ],

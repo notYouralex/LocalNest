@@ -36,7 +36,7 @@ class _ConversationInputAreaState extends State<ConversationInputArea> {
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: AppColors.textSecondary.withOpacity(0.2),
+                      color: AppColors.textSecondary.withValues(alpha: 0.2),
                     ),
                   ),
                   child: TextField(

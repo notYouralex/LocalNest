@@ -10,7 +10,7 @@ class ActionButton extends StatelessWidget {
   final Color? iconColor;
   final Color? textColor;
 
-  const ActionButton({
+  const ActionButton({super.key, 
     required this.label,
     required this.icon,
     required this.onTap,

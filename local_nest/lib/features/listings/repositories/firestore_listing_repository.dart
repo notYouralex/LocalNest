@@ -18,6 +18,7 @@ abstract class FirestoreListingRepository {
   });
   Stream<List<Listing>> watchAllActiveListings();
   Stream<List<Listing>> watchLandlordListings(String landlordId);
+  Stream<int> watchLandlordActiveListingsCount(String landlordId);
   Future<void> incrementViews(String listingId);
   Future<void> incrementInquiries(String listingId);
 }
@@ -162,6 +163,20 @@ class FirestoreListingRepositoryImpl implements FirestoreListingRepository {
         .snapshots()
         .map((snapshot) => 
             snapshot.docs.map((doc) => Listing.fromFirestore(doc)).toList());
+  }
+
+  @override
+  Stream<int> watchLandlordActiveListingsCount(String landlordId) {
+    return _listingsCollection
+        .where('landlordId', isEqualTo: landlordId)
+        .snapshots()
+        .map((snapshot) {
+          // Filter for active listings in memory to avoid composite index
+          final activeListings = snapshot.docs
+              .where((doc) => doc.data()['status'] == 'active')
+              .toList();
+          return activeListings.length;
+        });
   }
 
   @override

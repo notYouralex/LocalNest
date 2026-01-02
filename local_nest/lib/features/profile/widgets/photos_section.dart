@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/services/image_moderation_service.dart';
 import '../bloc/add_listing_bloc.dart';
 
 class PhotosSection extends StatefulWidget {
-  const PhotosSection({Key? key}) : super(key: key);
+  const PhotosSection({super.key});
 
   @override
   State<PhotosSection> createState() => _PhotosSectionState();
@@ -15,6 +16,9 @@ class PhotosSection extends StatefulWidget {
 class _PhotosSectionState extends State<PhotosSection> {
   List<String> _selectedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
+  final ImageModerationService _moderationService = ImageModerationService();
+  bool _isModeratingImages = false;
+  bool _hasInitializedPhotos = false; // Track if we've loaded initial photos
 
   Future<void> _pickImages() async {
     if (_selectedImages.length >= 3) {
@@ -35,14 +39,51 @@ class _PhotosSectionState extends State<PhotosSection> {
         // Only take up to remaining slots
         final filesToAdd = pickedFiles.take(remainingSlots).toList();
         final newPaths = filesToAdd.map((f) => f.path).toList();
-        setState(() {
-          _selectedImages.addAll(newPaths);
-        });
-        if (mounted) {
-          context.read<AddListingBloc>().add(PhotosAdded(_selectedImages));
+        
+        // Moderate images before adding
+        setState(() => _isModeratingImages = true);
+        
+        final approvedPaths = <String>[];
+        final rejectedMessages = <String>[];
+        
+        for (final path in newPaths) {
+          final result = await _moderationService.moderateImage(path);
+          if (result.isAcceptable) {
+            approvedPaths.add(path);
+          } else {
+            rejectedMessages.add(result.rejectionReason ?? 'Image rejected');
+          }
+        }
+        
+        setState(() => _isModeratingImages = false);
+        
+        // Show rejection messages if any
+        if (rejectedMessages.isNotEmpty && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                rejectedMessages.length == 1
+                    ? rejectedMessages.first
+                    : '${rejectedMessages.length} image(s) rejected: ${rejectedMessages.first}',
+              ),
+              backgroundColor: Colors.red.shade700,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+        
+        // Add approved images
+        if (approvedPaths.isNotEmpty) {
+          setState(() {
+            _selectedImages.addAll(approvedPaths);
+          });
+          if (mounted) {
+            context.read<AddListingBloc>().add(PhotosAdded(_selectedImages));
+          }
         }
       }
     } catch (e) {
+      setState(() => _isModeratingImages = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error picking images: $e')),
@@ -58,16 +99,21 @@ class _PhotosSectionState extends State<PhotosSection> {
     context.read<AddListingBloc>().add(PhotosAdded(_selectedImages));
   }
 
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AddListingBloc, AddListingState>(
       listener: (context, state) {
         if (state is AddListingFormUpdated) {
-          // Load existing photos when form is initialized
-          if (_selectedImages.isEmpty && state.formData.photoUrls.isNotEmpty) {
+          // Load existing photos only once when form is initialized
+          if (!_hasInitializedPhotos && state.formData.photoUrls.isNotEmpty) {
             setState(() {
               _selectedImages = List<String>.from(state.formData.photoUrls);
+              _hasInitializedPhotos = true;
             });
+          } else if (!_hasInitializedPhotos) {
+            // Mark as initialized even if no photos exist
+            _hasInitializedPhotos = true;
           }
         }
       },
@@ -89,7 +135,7 @@ class _PhotosSectionState extends State<PhotosSection> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.2),
+                    color: Colors.purple.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(Icons.image_outlined, color: Colors.purple, size: 20),
@@ -115,8 +161,34 @@ class _PhotosSectionState extends State<PhotosSection> {
               ),
             ),
             const SizedBox(height: 20),
+            // Loading indicator while moderating
+            if (_isModeratingImages)
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.purple.withValues(alpha: 0.5), width: 1),
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.purple.withValues(alpha: 0.05),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(color: Colors.purple),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Checking images...',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.purple,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             // Upload Area
-            if (_selectedImages.isEmpty)
+            if (!_isModeratingImages && _selectedImages.isEmpty)
               _buildUploadArea(),
             // Photos Grid
             if (_selectedImages.isNotEmpty) ...[
@@ -143,10 +215,18 @@ class _PhotosSectionState extends State<PhotosSection> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: _selectedImages.length < 3 ? _pickImages : null,
-                  icon: const Icon(Icons.add_photo_alternate),
+                  onPressed: (_selectedImages.length < 3 && !_isModeratingImages) ? _pickImages : null,
+                  icon: _isModeratingImages 
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.purple),
+                        )
+                      : const Icon(Icons.add_photo_alternate),
                   label: Text(
-                    'Add More Photos (${_selectedImages.length}/3)',
+                    _isModeratingImages 
+                        ? 'Checking images...' 
+                        : 'Add More Photos (${_selectedImages.length}/3)',
                     style: GoogleFonts.poppins(fontSize: 14),
                   ),
                   style: OutlinedButton.styleFrom(

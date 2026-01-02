@@ -1,4 +1,5 @@
 /// Messages widgets barrel file
+library;
 export 'conversation_list_item.dart';
 export 'message_bubble.dart';
 export 'date_separator.dart';

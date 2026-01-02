@@ -99,3 +99,18 @@ class ClearFiltersEvent extends SearchEvent {
   @override
   List<Object?> get props => [currentQuery];
 }
+
+/// Event to start watching listings for real-time updates
+class WatchSearchListingsEvent extends SearchEvent {
+  const WatchSearchListingsEvent();
+}
+
+/// Internal event to update listings from stream
+class ListingsUpdatedEvent extends SearchEvent {
+  final List<dynamic> listings;
+
+  const ListingsUpdatedEvent(this.listings);
+
+  @override
+  List<Object?> get props => [listings];
+}

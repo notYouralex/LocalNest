@@ -6,9 +6,9 @@ class ImageCarousel extends StatefulWidget {
   final List<String> images;
 
   const ImageCarousel({
-    Key? key,
+    super.key,
     required this.images,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageCarousel> createState() => _ImageCarouselState();
@@ -62,11 +62,11 @@ class _ImageCarouselState extends State<ImageCarousel> {
           left: 12,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 15,
                   offset: const Offset(0, 4),
                 ),
@@ -97,7 +97,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(

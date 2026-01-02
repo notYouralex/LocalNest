@@ -1,4 +1,5 @@
 /// BLoC barrel file
+library;
 export 'messages_event.dart';
 export 'messages_state.dart';
 export 'conversation_event.dart';

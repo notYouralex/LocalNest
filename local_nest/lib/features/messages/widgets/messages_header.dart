@@ -25,7 +25,7 @@ class MessagesHeader extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -57,7 +57,7 @@ class MessagesHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -78,7 +78,7 @@ class MessagesHeader extends StatelessWidget {
                   child: SvgPicture.asset(
                     'assets/icons/search_notclicked.svg',
                     fit: BoxFit.scaleDown,
-                    color: AppColors.textSecondary,
+                    colorFilter: ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn),
                   ),
                 ),
                 hintText: 'Search messages...',

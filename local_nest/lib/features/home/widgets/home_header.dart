@@ -125,7 +125,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                         child: SvgPicture.asset(
                           'assets/icons/search_notclicked.svg',
                           fit: BoxFit.scaleDown,
-                          color: AppColors.textSecondary,
+                          colorFilter: ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn),
                         ),
                       ),
                       suffixIcon: Padding(

@@ -58,7 +58,7 @@ class MessageBubble extends StatelessWidget {
                     _formatTime(message.timestamp),
                     style: AppTextStyles.bodySmall.copyWith(
                       color: isCurrentUser
-                          ? AppColors.textWhite.withOpacity(MessageBubbleConstants.timeStampOpacity)
+                          ? AppColors.textWhite.withValues(alpha: MessageBubbleConstants.timeStampOpacity)
                           : AppColors.textSecondary,
                       fontSize: MessageBubbleConstants.timeStampFontSize,
                     ),

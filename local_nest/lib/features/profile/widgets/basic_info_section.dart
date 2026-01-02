@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../bloc/add_listing_bloc.dart';
 
 class BasicInfoSection extends StatefulWidget {
-  const BasicInfoSection({Key? key}) : super(key: key);
+  const BasicInfoSection({super.key});
 
   @override
   State<BasicInfoSection> createState() => _BasicInfoSectionState();
@@ -72,7 +72,7 @@ class _BasicInfoSectionState extends State<BasicInfoSection> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.cyan.withOpacity(0.2),
+                    color: Colors.cyan.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(Icons.info_outline, color: Colors.cyan, size: 20),

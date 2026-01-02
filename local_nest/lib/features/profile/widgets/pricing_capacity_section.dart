@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../bloc/add_listing_bloc.dart';
 
 class PricingCapacitySection extends StatefulWidget {
-  const PricingCapacitySection({Key? key}) : super(key: key);
+  const PricingCapacitySection({super.key});
 
   @override
   State<PricingCapacitySection> createState() => _PricingCapacitySectionState();
@@ -79,7 +79,7 @@ class _PricingCapacitySectionState extends State<PricingCapacitySection> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.2),
+                    color: Colors.amber.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(Icons.payments, color: Colors.amber, size: 20),

@@ -85,7 +85,7 @@ class _SignUpPageState extends State<SignUpPage> {
             );
             // Navigate to login page after successful sign up
             Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) {
+              if (context.mounted) {
                 context.go(AppRoutes.login);
                 }
               }

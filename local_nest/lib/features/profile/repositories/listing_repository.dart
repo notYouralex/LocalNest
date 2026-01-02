@@ -77,8 +77,31 @@ class ListingRepositoryImpl implements ListingRepository {
         throw Exception('Listing not found');
       }
       
-      // Use photoUrls from form data (already uploaded URLs)
-      List<String> photoUrls = listingData['photoUrls'] as List<String>? ?? existingListing.photoUrls;
+      // Get photoUrls from form data
+      List<String> photoUrls = List<String>.from(listingData['photoUrls'] as List? ?? existingListing.photoUrls);
+      
+      // Check if any photos are local files (need to be uploaded)
+      final localPaths = <String>[];
+      final existingUrls = <String>[];
+      
+      for (final path in photoUrls) {
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+          existingUrls.add(path);
+        } else {
+          localPaths.add(path);
+        }
+      }
+      
+      // Upload any new local images to Cloudinary
+      if (localPaths.isNotEmpty) {
+        final uploadedUrls = await _cloudinaryService.uploadImages(
+          localPaths,
+          folder: 'localnest/listings',
+        );
+        existingUrls.addAll(uploadedUrls);
+      }
+      
+      photoUrls = existingUrls;
       
       // Update listing
       final updatedListing = existingListing.copyWith(

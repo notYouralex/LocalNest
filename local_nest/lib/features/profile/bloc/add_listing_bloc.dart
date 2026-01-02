@@ -300,8 +300,8 @@ class AddListingBloc extends Bloc<AddListingEvent, AddListingState> {
     PhotosAdded event,
     Emitter<AddListingState> emit,
   ) async {
-    final updatedPhotos = [..._currentFormData.photoUrls, ...event.photoPaths];
-    _currentFormData = _currentFormData.copyWith(photoUrls: updatedPhotos);
+    // Replace photos entirely with the provided list (not append)
+    _currentFormData = _currentFormData.copyWith(photoUrls: event.photoPaths);
     emit(AddListingFormUpdated(_currentFormData));
   }
 

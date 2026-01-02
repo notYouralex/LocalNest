@@ -5,7 +5,7 @@ import '../../../../app/theme/theme.dart';
 class AddListingButton extends StatelessWidget {
   final VoidCallback onTap;
 
-  const AddListingButton({required this.onTap});
+  const AddListingButton({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class AddListingButton extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.3),
+              color: AppColors.primary.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

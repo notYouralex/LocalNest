@@ -16,7 +16,7 @@ class FormTextField extends StatelessWidget {
   final bool obscureText;
 
   const FormTextField({
-    Key? key,
+    super.key,
     required this.label,
     this.hintText,
     this.controller,
@@ -29,7 +29,7 @@ class FormTextField extends StatelessWidget {
     this.suffixText,
     this.maxLength,
     this.obscureText = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -16,6 +16,9 @@ abstract class FavoritesService {
 
   /// Toggle favorite status (add if not exists, remove if exists)
   Future<bool> toggleFavorite(String userId, String listingId);
+
+  /// Watch favorites count in real-time
+  Stream<int> watchFavoritesCount(String userId);
 }
 
 /// Firestore implementation of favorites service
@@ -96,5 +99,14 @@ class FavoritesServiceImpl implements FavoritesService {
     } catch (e) {
       throw Exception('Failed to toggle favorite: $e');
     }
+  }
+
+  @override
+  Stream<int> watchFavoritesCount(String userId) {
+    return _firestore
+        .collection('favorites')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
   }
 }

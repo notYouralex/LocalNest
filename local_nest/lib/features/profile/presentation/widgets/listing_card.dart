@@ -11,7 +11,7 @@ class ListingCard extends StatelessWidget {
   final VoidCallback onToggleStatus;
   final VoidCallback onDelete;
 
-  const ListingCard({
+  const ListingCard({super.key, 
     required this.listing,
     required this.onEdit,
     required this.onToggleStatus,
@@ -205,7 +205,7 @@ class ListingCard extends StatelessWidget {
               label: ManageListingsConstants.deleteButton,
               icon: Icons.delete_outline,
               onTap: onDelete,
-              backgroundColor: AppColors.error.withOpacity(0.1),
+              backgroundColor: AppColors.error.withValues(alpha: 0.1),
               iconColor: AppColors.error,
               textColor: AppColors.error,
             ),

@@ -12,20 +12,15 @@ class DefaultIntroDataProvider implements IntroDataProvider {
       IntroOption(
         id: 'renter',
         title: 'Looking for a Place',
-        subtitle: 'Find verified boarding houses near you',
+        subtitle: 'Find boarding houses near you',
         icon: Icons.search,
         iconColor: AppColors.primary,
-        iconBgColor: AppColors.primary.withOpacity(0.1),
+        iconBgColor: AppColors.primary.withValues(alpha: 0.1),
         features: const [
           FeatureItem(
             icon: Icons.location_on,
             label: 'Map Search',
             color: AppColors.primary,
-          ),
-          FeatureItem(
-            icon: Icons.shield,
-            label: 'Verified',
-            color: AppColors.primaryLight,
           ),
           FeatureItem(
             icon: Icons.favorite,
@@ -43,17 +38,12 @@ class DefaultIntroDataProvider implements IntroDataProvider {
         subtitle: 'List and manage your properties',
         icon: Icons.home,
         iconColor: AppColors.textPrimary,
-        iconBgColor: AppColors.textPrimary.withOpacity(0.1),
+        iconBgColor: AppColors.textPrimary.withValues(alpha: 0.1),
         features: const [
           FeatureItem(
             icon: Icons.auto_awesome,
             label: 'Easy Listing',
             color: AppColors.textPrimary,
-          ),
-          FeatureItem(
-            icon: Icons.shield,
-            label: 'Get Verified',
-            color: AppColors.primaryLight,
           ),
         ],
         buttonText: 'Continue as Landlord',

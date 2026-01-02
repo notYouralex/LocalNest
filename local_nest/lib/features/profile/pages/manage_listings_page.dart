@@ -184,7 +184,7 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
                 // Update UI
                 setState(() => _listings.removeWhere((l) => l.id == id));
                 
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(ManageListingsConstants.successDeleteMessage),
@@ -192,7 +192,7 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
                   );
                 }
               } catch (e) {
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed to delete listing: $e')),
                   );
@@ -346,7 +346,7 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
                     width: ManageListingsConstants.headerBackButtonSize,
                     height: ManageListingsConstants.headerBackButtonSize,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(
                         ManageListingsConstants.buttonBorderRadius,
                       ),
@@ -410,7 +410,7 @@ class _ManageListingsPageState extends State<ManageListingsPage> {
           horizontal: ManageListingsConstants.itemSpacing,
         ),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           border: Border.all(
             color: AppColors.border,
             width: ManageListingsConstants.borderWidth,

@@ -9,7 +9,7 @@ class DetailColumn extends StatelessWidget {
 
   const DetailColumn(
     this.label,
-    this.value, {
+    this.value, {super.key, 
     this.isPrimary = false,
   });
 

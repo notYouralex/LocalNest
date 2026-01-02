@@ -5,6 +5,7 @@
 /// - Login
 /// - Sign Up (coming soon)
 /// - Forgot Password (coming soon)
+library;
 
 // Pages
 export 'pages/pages.dart';

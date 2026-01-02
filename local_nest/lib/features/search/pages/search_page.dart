@@ -37,6 +37,9 @@ class _SearchPageState extends State<SearchPage> {
     // Initialize BLoC
     _searchBloc = SearchBloc(repository: _repository);
 
+    // Start watching listings for real-time updates
+    _searchBloc.add(const WatchSearchListingsEvent());
+
     // Load all listings initially, or search with initial query
     Future.microtask(() {
       if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
