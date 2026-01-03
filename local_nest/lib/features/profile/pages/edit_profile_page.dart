@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
 import '../../../core/services/cloudinary_service.dart';
+import '../../../core/services/image_moderation_service.dart';
 import '../constants/edit_profile_modal_style.dart';
 import '../widgets/edit_profile_input_field.dart';
 import '../bloc/user_bloc.dart';
@@ -30,10 +31,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   bool _isLoading = false;
+  bool _isModeratingImage = false;
   String? _selectedImagePath;
   String? _uploadedImageUrl;
   final ImagePicker _imagePicker = ImagePicker();
   final CloudinaryService _cloudinaryService = CloudinaryService();
+  final ImageModerationService _moderationService = ImageModerationService();
 
   @override
   void initState() {
@@ -48,6 +51,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       text: widget.userProfile.phoneNumber ?? '',
     );
     _uploadedImageUrl = widget.userProfile.profileImageUrl;
+    _initializeModerationService();
   }
 
   @override
@@ -56,6 +60,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _emailController.dispose();
     _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeModerationService() async {
+    try {
+      await _moderationService.initialize();
+    } catch (e) {
+      // Silently handle initialization errors
+    }
   }
 
   String get _initials {
@@ -73,11 +85,48 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
 
       if (image != null) {
+        // Show moderating indicator
+        setState(() => _isModeratingImage = true);
+
+        // Moderate the image (profile version - allows faces)
+        final result = await _moderationService.moderateProfileImage(image.path);
+
+        setState(() => _isModeratingImage = false);
+
+        if (!result.isAcceptable) {
+          // Image was rejected
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  result.rejectionReason ?? 'Image cannot be used as profile photo',
+                ),
+                backgroundColor: Colors.red.shade700,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
+        // Image passed moderation
         setState(() {
           _selectedImagePath = image.path;
         });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Photo selected successfully'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
+      setState(() => _isModeratingImage = false);
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -165,8 +214,40 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Avatar
-                  _buildAvatar(),
+                  // Avatar with moderation overlay
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      _buildAvatar(),
+                      if (_isModeratingImage)
+                        Container(
+                          width: EditProfileModalStyle.avatarRadius,
+                          height: EditProfileModalStyle.avatarRadius,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withOpacity(0.6),
+                          ),
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Verifying...',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: EditProfileModalStyle.avatarPhotoSpacing),
                   // Change photo button
                   _buildChangePhotoButton(),
@@ -297,14 +378,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildChangePhotoButton() {
     return GestureDetector(
-      onTap: _handleChangePhoto,
+      onTap: _isModeratingImage ? null : _handleChangePhoto,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(
             EditProfileModalStyle.buttonBorderRadius,
           ),
-          color: AppColors.greenBackground,
+          color: _isModeratingImage 
+              ? AppColors.greenBackground.withOpacity(0.5)
+              : AppColors.greenBackground,
           border: Border.all(
             color: AppColors.border,
           ),
@@ -312,16 +395,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.camera_alt,
               size: EditProfileModalStyle.cameraIconSize,
-              color: AppColors.textPrimary,
+              color: _isModeratingImage 
+                  ? AppColors.textPrimary.withOpacity(0.5)
+                  : AppColors.textPrimary,
             ),
             const SizedBox(width: 8),
             Text(
-              'Change Photo',
+              _isModeratingImage ? 'Verifying Photo...' : 'Change Photo',
               style: AppTextStyles.label.copyWith(
                 fontWeight: FontWeight.w600,
+                color: _isModeratingImage 
+                    ? AppColors.textPrimary.withOpacity(0.5)
+                    : AppColors.textPrimary,
               ),
             ),
           ],
