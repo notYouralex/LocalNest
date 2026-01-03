@@ -109,7 +109,7 @@ class _PhotosSectionState extends State<PhotosSection> {
           );
         }
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       setState(() => _isModeratingImages = false);
       
       if (mounted) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../app/theme/theme.dart';
+import '../app/theme/theme.dart';
 
 /// Reusable price input field for filter modals
 class PriceInput extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../app/theme/theme.dart';
+import '../app/theme/theme.dart';
 
 /// Reusable advanced filter modal for search and home features
 /// Filters by: price range, room type, and capacity

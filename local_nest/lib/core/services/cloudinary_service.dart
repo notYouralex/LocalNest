@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
-import '../config/cloudinary_config.dart';
+import 'package:local_nest/core/config/cloudinary_config.dart';
 
 /// Service for uploading images to Cloudinary
 class CloudinaryService {
