@@ -96,7 +96,7 @@ class ImageModerationService {
       }
 
       _isInitialized = true;
-    } catch (e, stackTrace) {
+    } catch (e) {
       _isInitialized = true;
       _apiUser = '';
       _apiSecret = '';
@@ -243,7 +243,7 @@ class ImageModerationService {
       }
 
       return ModerationResult.acceptable();
-    } catch (e, stackTrace) {
+    } catch (e) {
       return ModerationResult.acceptable();
     }
   }
@@ -294,19 +294,19 @@ class ImageModerationService {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      print('🔒 PROFILE MODERATION - Response status: ${response.statusCode}');
+     
 
       if (response.statusCode != 200) {
-        print('❌ PROFILE - API failed: ${response.body}');
+      
         return ModerationResult.acceptable();
       }
 
       final data = jsonDecode(response.body);
-      print('📊 PROFILE - Response data: $data');
+     
 
       // Check for errors
       if (data['status'] == 'failure') {
-        print('❌ PROFILE - API error: ${data['error']}');
+       
         return ModerationResult.acceptable();
       }
 
@@ -323,11 +323,11 @@ class ImageModerationService {
             ? (nudity['suggestive'] as int).toDouble()
             : nudity['suggestive'] ?? 0.0;
         
-        print('🔒 PROFILE - Nudity scores: raw=$rawScore, partial=$partialScore, suggestive=$suggestiveScore');
+      
         
         // Check for explicit nudity
         if (rawScore > 0.3 || partialScore > 0.5) {
-          print('❌ PROFILE - REJECTED due to nudity');
+          
           return ModerationResult.rejected(
             'This image contains adult content and cannot be used as a profile picture.',
           );
@@ -335,7 +335,7 @@ class ImageModerationService {
         
         // Check for suggestive content (lingerie, revealing clothing, etc.)
         if (suggestiveScore > 0.7) {
-          print('❌ PROFILE - REJECTED due to suggestive content');
+        
           return ModerationResult.rejected(
             'This image contains inappropriate content and cannot be used as a profile picture.',
           );
@@ -347,10 +347,9 @@ class ImageModerationService {
           ? (data['weapon'] as int).toDouble()
           : data['weapon'] ?? 0.0;
       
-      print('🔒 PROFILE - Weapon score: $weapon');
       
       if (weapon > 0.5) {
-        print('❌ PROFILE - REJECTED due to weapons/drugs');
+        
         return ModerationResult.rejected(
           'This image contains inappropriate content and cannot be used as a profile picture.',
         );
@@ -363,10 +362,10 @@ class ImageModerationService {
             ? (offensive['prob'] as int).toDouble()
             : offensive['prob'] ?? 0.0;
         
-        print('🔒 PROFILE - Offensive score: $offensiveProb');
+        
         
         if (offensiveProb > 0.5) {
-          print('❌ PROFILE - REJECTED due to offensive content');
+          
           return ModerationResult.rejected(
             'This image contains offensive content and cannot be used as a profile picture.',
           );
@@ -380,24 +379,22 @@ class ImageModerationService {
             ? (gore['prob'] as int).toDouble()
             : gore['prob'] ?? 0.0;
         
-        print('🔒 PROFILE - Gore score: $goreProb');
+     
         
         if (goreProb > 0.5) {
-          print('❌ PROFILE - REJECTED due to gore/violence');
+         
           return ModerationResult.rejected(
             'This image contains violent content and cannot be used as a profile picture.',
           );
         }
       }
 
-      print('✅ PROFILE - Image ACCEPTED');
-      print('📊 PROFILE - Summary: Nudity(raw=$nudity, partial=$nudity), Weapon=$weapon, Offensive=${offensive?['prob']}, Gore=${gore?['prob']}');
+      
       
       // No face check for profile images - faces are expected!
       return ModerationResult.acceptable();
-    } catch (e, stackTrace) {
-      print('❌ PROFILE - Exception: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
+
       return ModerationResult.acceptable();
     }
   }
