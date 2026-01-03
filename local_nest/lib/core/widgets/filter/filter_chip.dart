@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../app/theme/theme.dart';
+import '../../../../../app/theme/theme.dart';
 
 /// Reusable filter chip widget for price, room type, capacity, etc.
 class FilterChip extends StatelessWidget {

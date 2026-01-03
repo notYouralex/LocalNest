@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../features/listing_detail/listing_detail.dart';
+import '../../features/listing_detail/listing_detail.dart';
 
 /// Centralized navigation methods for the app
 /// This removes hardcoded route strings scattered throughout the codebase
