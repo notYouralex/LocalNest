@@ -116,16 +116,12 @@ flutter run
 ## 📱 Supported Platforms
 
 - ✅ Android
-- ✅ iOS
-- ✅ Web
-- ✅ Windows
-- ✅ macOS
-- ✅ Linux
 
 ## 🔧 Build Commands
 
 ```bash
-# Development build
+# Devel
+opment build
 flutter run
 
 # Release build for Android
