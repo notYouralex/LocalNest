@@ -92,3 +92,72 @@ class UserProfile extends Equatable {
         isActive,
       ];
 }
+
+/// User notification settings
+class NotificationSettings {
+  final bool newListings;
+  final bool messages;
+  final bool availability;
+
+  NotificationSettings({
+    this.newListings = true,
+    this.messages = true,
+    this.availability = false,
+  });
+
+  NotificationSettings copyWith({
+    bool? newListings,
+    bool? messages,
+    bool? availability,
+  }) {
+    return NotificationSettings(
+      newListings: newListings ?? this.newListings,
+      messages: messages ?? this.messages,
+      availability: availability ?? this.availability,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'newListings': newListings,
+    'messages': messages,
+    'availability': availability,
+  };
+
+  factory NotificationSettings.fromJson(Map<String, dynamic> json) =>
+      NotificationSettings(
+        newListings: json['newListings'] as bool? ?? true,
+        messages: json['messages'] as bool? ?? true,
+        availability: json['availability'] as bool? ?? false,
+      );
+}
+
+/// User stats for renter dashboard
+class RenterStats {
+  final int favorites;
+  final int messages;
+
+  RenterStats({
+    this.favorites = 0,
+    this.messages = 0,
+  });
+
+  RenterStats copyWith({
+    int? favorites,
+    int? messages,
+  }) {
+    return RenterStats(
+      favorites: favorites ?? this.favorites,
+      messages: messages ?? this.messages,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'favorites': favorites,
+    'messages': messages,
+  };
+
+  factory RenterStats.fromJson(Map<String, dynamic> json) => RenterStats(
+    favorites: json['favorites'] as int? ?? 0,
+    messages: json['messages'] as int? ?? 0,
+  );
+}

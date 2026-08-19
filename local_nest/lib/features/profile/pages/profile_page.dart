@@ -9,7 +9,7 @@ import '../../../features/favorites/services/favorites_service.dart';
 import '../../../features/messages/services/messaging_service.dart';
 import '../../../features/listings/repositories/firestore_listing_repository.dart';
 import '../constants/profile_constants.dart';
-import '../models/user_model.dart';
+import '../models/user_profile.dart';
 import '../bloc/user_bloc.dart';
 import '../bloc/user_event.dart';
 import '../bloc/user_state.dart';

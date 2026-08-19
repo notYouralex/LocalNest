@@ -27,6 +27,7 @@ extension ListingToUIExtension on Listing {
   /// Convert to ListingDetail for detail page
   ListingDetail toListingDetail({
     String? landlordName,
+    String? landlordProfileImageUrl,
     bool isLandlordVerified = false,
   }) {
     return ListingDetail(
@@ -36,11 +37,14 @@ extension ListingToUIExtension on Listing {
       barangay: city,
       price: monthlyRent,
       slotsAvailable: availableSlots,
-      images: photoUrls.isNotEmpty ? photoUrls : ['https://via.placeholder.com/440x320'],
+      images: photoUrls.isNotEmpty ? photoUrls : [],
       description: description,
       tags: _extractTags(),
+      landlordId: landlordId,
       landlordName: landlordName ?? 'Property Owner',
-      
+      landlordProfileImageUrl: landlordProfileImageUrl,
+      latitude: latitude,
+      longitude: longitude,
     );
   }
 

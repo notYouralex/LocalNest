@@ -6,8 +6,8 @@ import 'firebase_signup_auth_service.dart';
 
 /// Service provider for authentication services
 class AuthServiceProvider {
-  static late LoginAuthService _loginAuthService;
-  static late SignUpAuthService _signUpAuthService;
+  static LoginAuthService? _loginAuthService;
+  static SignUpAuthService? _signUpAuthService;
 
   /// Initialize Firebase authentication services
   static void initializeFirebaseServices() {
@@ -17,12 +17,12 @@ class AuthServiceProvider {
 
   /// Get login auth service
   static LoginAuthService getLoginAuthService() {
-    return _loginAuthService;
+    return _loginAuthService ??= FirebaseLoginAuthService();
   }
 
   /// Get sign up auth service
   static SignUpAuthService getSignUpAuthService() {
-    return _signUpAuthService;
+    return _signUpAuthService ??= FirebaseSignUpAuthService();
   }
 
   /// Check if user is authenticated

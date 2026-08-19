@@ -1,4 +1,4 @@
-asd# LocalNest 🏠
+# LocalNest 🏠
 
 A Flutter-based mobile application for finding and listing rental properties. LocalNest connects landlords with tenants, making it easy to discover boarding houses, apartments, and shared rooms in your local area.
 

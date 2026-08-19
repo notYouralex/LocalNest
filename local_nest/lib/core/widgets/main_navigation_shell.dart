@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../app/theme/theme.dart';
-import '../../features/home/bloc/listing_bloc.dart';
-import '../../features/home/repositories/listing_repository_impl.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/search/pages/search_page.dart';
 import '../../features/favorites/favorites.dart';
 import '../../features/messages/messages.dart';
+import '../../features/messages/services/messaging_service.dart';
 import '../../features/profile/profile.dart';
 import '../../features/profile/bloc/user_bloc.dart';
 import '../../features/profile/repositories/firestore_user_repository.dart';
@@ -35,6 +35,9 @@ class MainNavigationShell extends StatefulWidget {
 class _MainNavigationShellState extends State<MainNavigationShell> {
   late int _currentIndex;
   late List<Widget> _pages;
+  final MessagingService _messagingService = MessagingService();
+  StreamSubscription<int>? _unreadCountSubscription;
+  int _unreadMessageCount = 0;
 
   @override
   void initState() {
@@ -43,7 +46,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     _pages = [
       const HomePage(),
       SearchPage(initialQuery: widget.searchQuery),
-      FavoritesPage(),
+      const FavoritesPage(),
       const MessagesPage(),
       BlocProvider(
         create: (context) => UserBloc(
@@ -52,68 +55,93 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         child: const ProfilePage(),
       ),
     ];
+
+    _subscribeToUnreadCount();
+  }
+
+  void _subscribeToUnreadCount() {
+    try {
+      _unreadCountSubscription = _messagingService
+          .getTotalUnreadCountStream()
+          .listen(
+            (count) {
+              if (mounted) {
+                setState(() {
+                  _unreadMessageCount = count;
+                });
+              }
+            },
+            onError: (error) {
+              // Silently ignore stream error
+            },
+          );
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _unreadCountSubscription?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ListingBloc>(
-      create: (context) => ListingBloc(repository: ListingRepositoryImpl()),
-      child: Scaffold(
-        body: IndexedStack(index: _currentIndex, children: _pages),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _NavItem(
-                    label: 'Home',
-                    activeIcon: 'assets/icons/home_clicked.svg',
-                    inactiveIcon: 'assets/icons/home_notclicked.svg',
-                    isSelected: _currentIndex == 0,
-                    onTap: () => _onTabTapped(0),
-                  ),
-                  _NavItem(
-                    label: 'Search',
-                    activeIcon: 'assets/icons/search_clicked.svg',
-                    inactiveIcon: 'assets/icons/search_notclicked.svg',
-                    isSelected: _currentIndex == 1,
-                    onTap: () => _onTabTapped(1),
-                  ),
-                  _NavItem(
-                    label: 'Favorites',
-                    activeIcon: 'assets/icons/heart_clicked.svg',
-                    inactiveIcon: 'assets/icons/heart_notclicked.svg',
-                    isSelected: _currentIndex == 2,
-                    onTap: () => _onTabTapped(2),
-                  ),
-                  _NavItem(
-                    label: 'Messages',
-                    activeIcon: 'assets/icons/messages_clicked.svg',
-                    inactiveIcon: 'assets/icons/messages_notclicked.svg',
-                    isSelected: _currentIndex == 3,
-                    onTap: () => _onTabTapped(3),
-                  ),
-                  _NavItem(
-                    label: 'Profile',
-                    activeIcon: 'assets/icons/profile_clicked.svg',
-                    inactiveIcon: 'assets/icons/profile_notclicked.svg',
-                    isSelected: _currentIndex == 4,
-                    onTap: () => _onTabTapped(4),
-                  ),
-                ],
-              ),
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(
+                  label: 'Home',
+                  activeIcon: 'assets/icons/home_clicked.svg',
+                  inactiveIcon: 'assets/icons/home_notclicked.svg',
+                  isSelected: _currentIndex == 0,
+                  onTap: () => _onTabTapped(0),
+                ),
+                _NavItem(
+                  label: 'Search',
+                  activeIcon: 'assets/icons/search_clicked.svg',
+                  inactiveIcon: 'assets/icons/search_notclicked.svg',
+                  isSelected: _currentIndex == 1,
+                  onTap: () => _onTabTapped(1),
+                ),
+                _NavItem(
+                  label: 'Favorites',
+                  activeIcon: 'assets/icons/heart_clicked.svg',
+                  inactiveIcon: 'assets/icons/heart_notclicked.svg',
+                  isSelected: _currentIndex == 2,
+                  onTap: () => _onTabTapped(2),
+                ),
+                _NavItem(
+                  label: 'Messages',
+                  activeIcon: 'assets/icons/messages_clicked.svg',
+                  inactiveIcon: 'assets/icons/messages_notclicked.svg',
+                  isSelected: _currentIndex == 3,
+                  badgeCount: _unreadMessageCount,
+                  onTap: () => _onTabTapped(3),
+                ),
+                _NavItem(
+                  label: 'Profile',
+                  activeIcon: 'assets/icons/profile_clicked.svg',
+                  inactiveIcon: 'assets/icons/profile_notclicked.svg',
+                  isSelected: _currentIndex == 4,
+                  onTap: () => _onTabTapped(4),
+                ),
+              ],
             ),
           ),
         ),
@@ -128,12 +156,13 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   }
 }
 
-/// Navigation item widget
+/// Navigation item widget with optional unread badge
 class _NavItem extends StatelessWidget {
   final String label;
   final String activeIcon;
   final String inactiveIcon;
   final bool isSelected;
+  final int badgeCount;
   final VoidCallback onTap;
 
   const _NavItem({
@@ -141,6 +170,7 @@ class _NavItem extends StatelessWidget {
     required this.activeIcon,
     required this.inactiveIcon,
     required this.isSelected,
+    this.badgeCount = 0,
     required this.onTap,
   });
 
@@ -154,10 +184,43 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              isSelected ? activeIcon : inactiveIcon,
-              width: 24,
-              height: 24,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SvgPicture.asset(
+                  isSelected ? activeIcon : inactiveIcon,
+                  width: 24,
+                  height: 24,
+                ),
+                if (badgeCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        badgeCount > 99 ? '99+' : '$badgeCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
